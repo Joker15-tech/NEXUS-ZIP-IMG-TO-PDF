@@ -1,0 +1,39 @@
+{
+  "name": "zipped-imgs-to-pdf",
+  "version": "1.0.0",
+  "description": "Converts ZIP files containing images to PDF files",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "zip",
+    "pdf",
+    "image",
+    "converter"
+  ],
+  "author": "Junghwan Park",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/ui": "^1.0.4",
+    "@vitest/coverage-v8": "^1.0.4",
+    "vitest": "^1.0.4",
+    "jsdom": "^23.0.1",
+    "canvas": "^2.11.2"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "jspdf": "^2.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/9bow/zipped-imgs-to-pdf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/9bow/zipped-imgs-to-pdf/issues"
+  },
+  "homepage": "https://github.com/9bow/zipped-imgs-to-pdf#readme"
+}

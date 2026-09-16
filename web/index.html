@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zipped Images to PDF Converter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Zipped Images to PDF Converter</h1>
+            <p class="subtitle">Convert images or ZIP files to PDF (100% Client-Side)</p>
+        </header>
+
+        <main>
+            <div class="settings-section">
+                <div class="settings-header">
+                    <h2>Settings</h2>
+                    <button class="btn btn-reset" id="resetSettingsBtn">Reset to Defaults</button>
+                </div>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="naturalSortEnabled" checked>
+                            <span>Enable Natural Sort (sort numbers naturally)</span>
+                        </label>
+                        <p class="setting-description">Example: page_1, page_2, page_10 (disabled: page_1, page_10,
+                            page_2)</p>
+                    </div>
+                    <div class="setting-item">
+                        <label for="priorityChars">Priority Characters:</label>
+                        <input type="text" id="priorityChars" value="!" placeholder="e.g.: !@">
+                        <p class="setting-description">Images starting with these characters will be placed first</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <div class="drop-zone" id="dropZone">
+                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p class="drop-text">Drag and drop ZIP files or images here or click to select</p>
+                    <input type="file" id="fileInput" accept=".zip,.jpg,.jpeg,.png,.gif,.webp" multiple hidden>
+                    <button class="btn-select" onclick="document.getElementById('fileInput').click()">Select
+                        Files</button>
+                </div>
+            </div>
+
+            <div class="convert-all-section" id="convertAllSection" style="display: none;">
+                <div class="button-group" id="convertButtonGroup">
+                    <!-- Buttons will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <div class="info-section">
+                <h2>Features</h2>
+                <ul>
+                    <li>Convert ZIP files containing images to PDF</li>
+                    <li>Convert multiple image files to a single PDF</li>
+                    <li>Configurable Natural Sort - sorts numbers in filenames naturally (e.g., page_1, page_2, page_10)
+                    </li>
+                    <li>Priority character settings - place images starting with specific characters first (default:
+                        <code>!</code>)
+                    </li>
+                    <li>Supports various image formats (JPG, JPEG, PNG, GIF, WebP)</li>
+                    <li>100% client-side processing - files are never uploaded to a server</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer>
+            <p>
+                <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank">GitHub</a> |
+                MIT License
+            </p>
+        </footer>
+    </div>
+
+    <div class="modal" id="progressModal">
+        <div class="modal-content">
+            <h2>Converting...</h2>
+            <div class="progress-info" id="progressInfo">Preparing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal" id="notificationModal">
+        <div class="modal-content notification-modal">
+            <div class="notification-icon" id="notificationIcon">
+                <!-- Icon will be dynamically inserted -->
+            </div>
+            <h2 id="notificationTitle">Notification</h2>
+            <div class="notification-message" id="notificationMessage"></div>
+            <button class="btn btn-primary" id="notificationCloseBtn">OK</button>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Shared Logic -->
+    <script src="../shared/sorting-logic.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="app.js"></script>
+</body>
+
+</html>
