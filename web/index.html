@@ -1,93 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zipped Images to PDF Converter</title>
+    <meta name="description" content="NEXUS QUANTUM — Convert ZIP archives or image sets into a single PDF. 100% client-side.">
+    <meta name="author" content="NEXUS_QUANTUM">
+    <meta name="theme-color" content="#05060b">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="NEXUS // ZIP ⇄ PDF Converter">
+    <meta property="og:description" content="Convert ZIP archives or image sets into a single PDF — 100% client-side.">
+    <meta property="og:type" content="website">
+
+    <title>NEXUS // ZIP ⇄ PDF Converter</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@300;400;600&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
+
+    <!-- ================= AMBIENT LAYERS ================= -->
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-orbs" aria-hidden="true">
+        <span class="orb orb-cyan"></span>
+        <span class="orb orb-violet"></span>
+        <span class="orb orb-magenta"></span>
+    </div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
     <div class="container">
-        <header>
-            <h1>Zipped Images to PDF Converter</h1>
-            <p class="subtitle">Convert images or ZIP files to PDF (100% Client-Side)</p>
+
+        <!-- ================= HEADER ================= -->
+        <header class="hud-header">
+            <div class="hud-corner tl"></div>
+            <div class="hud-corner tr"></div>
+            <div class="hud-corner bl"></div>
+            <div class="hud-corner br"></div>
+
+            <div class="status-row">
+                <span class="status-dot"></span>
+                <span class="status-text">SYSTEM ONLINE</span>
+                <span class="status-sep">//</span>
+                <span class="status-text dim">NODE: LOCAL</span>
+                <span class="status-sep">//</span>
+                <span class="status-text dim" id="hud-clock">--:--:--</span>
+            </div>
+
+            <h1 class="glitch" data-text="ZIPPED IMAGES → PDF">
+                ZIPPED IMAGES <span class="arrow">→</span> PDF
+            </h1>
+            <p class="subtitle">
+                <span class="bracket">[</span>
+                Convert ZIP archives or image sets into a single PDF — <em>100% client-side</em>
+                <span class="bracket">]</span>
+            </p>
         </header>
 
         <main>
-            <div class="settings-section">
-                <div class="settings-header">
-                    <h2>Settings</h2>
-                    <button class="btn btn-reset" id="resetSettingsBtn">Reset to Defaults</button>
+
+            <!-- ================= 01 · SETTINGS ================= -->
+            <section class="panel settings-section">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <span class="panel-index">01</span>
+                        <h2>CONFIGURATION</h2>
+                    </div>
+                    <button type="button" class="btn btn-reset" id="resetSettingsBtn">
+                        <span class="btn-glow"></span>
+                        ⟲ RESET DEFAULTS
+                    </button>
                 </div>
+
                 <div class="settings-grid">
                     <div class="setting-item">
                         <label class="checkbox-label">
                             <input type="checkbox" id="naturalSortEnabled" checked>
-                            <span>Enable Natural Sort (sort numbers naturally)</span>
+                            <span class="checkbox-box"></span>
+                            <span class="checkbox-text">Enable Natural Sort</span>
                         </label>
-                        <p class="setting-description">Example: page_1, page_2, page_10 (disabled: page_1, page_10,
-                            page_2)</p>
+                        <p class="setting-description">
+                            Sorts numeric tokens in filenames.<br>
+                            <code>page_1 · page_2 · page_10</code>
+                            <span class="vs">vs</span>
+                            <code class="dim">page_1 · page_10 · page_2</code>
+                        </p>
                     </div>
+
                     <div class="setting-item">
-                        <label for="priorityChars">Priority Characters:</label>
-                        <input type="text" id="priorityChars" value="!" placeholder="e.g.: !@">
-                        <p class="setting-description">Images starting with these characters will be placed first</p>
+                        <label for="priorityChars" class="field-label">Priority Characters</label>
+                        <input type="text" id="priorityChars" value="!" placeholder="e.g.: !@" autocomplete="off" spellcheck="false">
+                        <p class="setting-description">Images starting with these chars are ordered first.</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="upload-section">
+            <!-- ================= 02 · UPLOAD ================= -->
+            <section class="panel upload-section">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <span class="panel-index">02</span>
+                        <h2>INPUT STREAM</h2>
+                    </div>
+                    <span class="panel-tag">ACCEPT: .zip .jpg .jpeg .png .gif .webp</span>
+                </div>
+
                 <div class="drop-zone" id="dropZone">
-                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="drop-text">Drag and drop ZIP files or images here or click to select</p>
-                    <input type="file" id="fileInput" accept=".zip,.jpg,.jpeg,.png,.gif,.webp" multiple hidden>
-                    <button class="btn-select" onclick="document.getElementById('fileInput').click()">Select
-                        Files</button>
+                    <div class="drop-zone-inner">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p class="drop-text">DROP ARCHIVES OR IMAGES HERE</p>
+                        <p class="drop-sub">or click to browse local filesystem</p>
+
+                        <input type="file" id="fileInput"
+                               accept=".zip,.jpg,.jpeg,.png,.gif,.webp"
+                               multiple hidden>
+
+                        <button type="button" class="btn btn-select"
+                                onclick="document.getElementById('fileInput').click()">
+                            <span class="btn-glow"></span>
+                            ⬢ SELECT FILES
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="convert-all-section" id="convertAllSection" style="display: none;">
-                <div class="button-group" id="convertButtonGroup">
-                    <!-- Buttons will be dynamically inserted here -->
+            <!-- ================= CONVERT ACTION (injected) ================= -->
+            <section class="convert-all-section" id="convertAllSection" style="display: none;">
+                <div class="button-group" id="convertButtonGroup"></div>
+            </section>
+
+            <!-- ================= FILE LIST (injected) ================= -->
+            <section class="file-list" id="fileList"></section>
+
+            <!-- ================= 03 · FEATURES ================= -->
+            <section class="panel info-section">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <span class="panel-index">03</span>
+                        <h2>CORE CAPABILITIES</h2>
+                    </div>
                 </div>
-            </div>
-
-            <div class="file-list" id="fileList"></div>
-
-            <div class="info-section">
-                <h2>Features</h2>
-                <ul>
-                    <li>Convert ZIP files containing images to PDF</li>
-                    <li>Convert multiple image files to a single PDF</li>
-                    <li>Configurable Natural Sort - sorts numbers in filenames naturally (e.g., page_1, page_2, page_10)
-                    </li>
-                    <li>Priority character settings - place images starting with specific characters first (default:
-                        <code>!</code>)
-                    </li>
-                    <li>Supports various image formats (JPG, JPEG, PNG, GIF, WebP)</li>
-                    <li>100% client-side processing - files are never uploaded to a server</li>
+                <ul class="feature-grid">
+                    <li><span class="feat-id">F-01</span> Convert ZIP archives containing images into a PDF</li>
+                    <li><span class="feat-id">F-02</span> Batch multiple image files into a single PDF</li>
+                    <li><span class="feat-id">F-03</span> Configurable natural sort (page_1, page_2, page_10)</li>
+                    <li><span class="feat-id">F-04</span> Priority character routing (default <code>!</code>)</li>
+                    <li><span class="feat-id">F-05</span> Supports JPG, JPEG, PNG, GIF, WebP</li>
+                    <li><span class="feat-id">F-06</span> 100% client-side — files never leave your device</li>
                 </ul>
-            </div>
+            </section>
         </main>
 
-        <footer>
-            <p>
-                <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank">GitHub</a> |
-                MIT License
-            </p>
+        <!-- ================= FOOTER ================= -->
+        <footer class="hud-footer">
+            <div class="footer-left">
+                <span class="brand">NEXUS<span class="brand-dot">_</span>QUANTUM</span>
+                <span class="footer-sep">//</span>
+                <span class="footer-meta">MIT LICENSE</span>
+            </div>
+
+            <div class="footer-socials">
+                <a href="https://github.com/9bow/zipped-imgs-to-pdf"
+                   target="_blank" rel="noopener noreferrer"
+                   class="social-link" title="GitHub Repository">
+                    <span class="social-label">GITHUB</span>
+                </a>
+                <a href="https://x.com/NEXUS_QUANTUM"
+                   target="_blank" rel="noopener noreferrer"
+                   class="social-link" title="X / Twitter — @NEXUS_QUANTUM">
+                    <span class="social-label">X · @NEXUS_QUANTUM</span>
+                </a>
+                <a href="https://instagram.com/NEXUS_QUANTUM"
+                   target="_blank" rel="noopener noreferrer"
+                   class="social-link" title="Instagram — @NEXUS_QUANTUM">
+                    <span class="social-label">IG · @NEXUS_QUANTUM</span>
+                </a>
+                <a href="mailto:drxenon487@gmail.com" class="social-link" title="Email — drxenon487@gmail.com">
+                    <span class="social-label">drxenon487@gmail.com</span>
+                </a>
+            </div>
         </footer>
     </div>
 
-    <div class="modal" id="progressModal">
+    <!-- ================= PROGRESS MODAL ================= -->
+    <div class="modal" id="progressModal" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
         <div class="modal-content">
-            <h2>Converting...</h2>
-            <div class="progress-info" id="progressInfo">Preparing...</div>
+            <div class="modal-scan"></div>
+            <h2 id="progressTitle"><span class="pulse-dot"></span> CONVERTING</h2>
+            <div class="progress-info" id="progressInfo">Preparing…</div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -95,27 +203,46 @@
         </div>
     </div>
 
-    <!-- Notification Modal -->
-    <div class="modal" id="notificationModal">
+    <!-- ================= NOTIFICATION MODAL ================= -->
+    <div class="modal" id="notificationModal" role="dialog" aria-modal="true" aria-labelledby="notificationTitle">
         <div class="modal-content notification-modal">
-            <div class="notification-icon" id="notificationIcon">
-                <!-- Icon will be dynamically inserted -->
-            </div>
+            <div class="modal-scan"></div>
+            <div class="notification-icon" id="notificationIcon"></div>
             <h2 id="notificationTitle">Notification</h2>
             <div class="notification-message" id="notificationMessage"></div>
-            <button class="btn btn-primary" id="notificationCloseBtn">OK</button>
+            <button type="button" class="btn btn-primary" id="notificationCloseBtn">
+                <span class="btn-glow"></span>
+                ACKNOWLEDGE
+            </button>
         </div>
     </div>
 
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- ============================================================
+         EXTERNAL LIBRARIES (ordre critique : JSZip → jsPDF → shared → app)
+         ============================================================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- Shared Logic -->
+    <!-- Shared sorting logic (utilisé par app.js) -->
     <script src="../shared/sorting-logic.js"></script>
 
-    <!-- Application Scripts -->
+    <!-- Application principale -->
     <script src="app.js"></script>
-</body>
 
+    <!-- HUD clock (cosmétique uniquement) -->
+    <script>
+        (function () {
+            const el = document.getElementById('hud-clock');
+            if (!el) return;
+            const pad = n => String(n).padStart(2, '0');
+            const tick = () => {
+                const d = new Date();
+                el.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            };
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
+
+</body>
 </html>
