@@ -1,44 +1,69 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════╗
  * ║  NEXUS QUANTUM // Zipped Images → PDF Converter                  ║
- * ║  ----------------------------------------------------------------- ║
- * ║  Convert ZIP archives or image sets into PDF.                    ║
- * ║  100% client-side. Zero uploads. Zero telemetry.                 ║
- * ║  ----------------------------------------------------------------- ║
- * ║  Author  : @NEXUS_QUANTUM                                        ║
- * ║  Contact : drxenon487@gmail.com                                  ║
- * ║  License : MIT                                                   ║
+ * ║  ──────────────────────────────────────────────────────────────── ║
+ * ║  Application:  web/app.js                                        ║
+ * ║  Version  :    2.0.0-nexus                                       ║
+ * ║  Author   :    @NEXUS_QUANTUM                                    ║
+ * ║  Contact  :    drxenon487@gmail.com                              ║
+ * ║  License  :    MIT                                               ║
+ * ║  ──────────────────────────────────────────────────────────────── ║
+ * ║  Dependencies (must be loaded BEFORE this file):                 ║
+ * ║    1. JSZip                 (CDN)                                ║
+ * ║    2. jsPDF UMD             (CDN)                                ║
+ * ║    3. shared/constants.js   (window.NexusConstants)              ║
+ * ║    4. shared/sorting-logic.js (window.NexusSorting)              ║
+ * ║  ──────────────────────────────────────────────────────────────── ║
+ * ║  100% client-side · zero uploads · zero telemetry                ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
 'use strict';
 
 // =====================================================================
-// § 00 — CONSTANTS
+// § 00 — BOOTSTRAP / CONSTANTS
 // =====================================================================
 
-const APP_VERSION   = '2.0.0-nexus';
-const APP_CODENAME  = 'QUANTUM';
+const APP_VERSION  = '2.0.0-nexus';
+const APP_CODENAME = 'QUANTUM';
 
-// Storage keys
+// -- Shared constants (from NexusConstants or fallback) ---------------
+const _C = (typeof window.NexusConstants !== 'undefined' && window.NexusConstants)
+    ? window.NexusConstants
+    : null;
+
+const _FALLBACK_CONSTANTS = {
+    IMAGE_EXTENSIONS:          ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'],
+    DEFAULT_PRIORITY_CHARS:    '!',
+    MAX_FILE_SIZE_BYTES:       100 * 1024 * 1024, // 100 MB
+    MAX_EXTRACTED_SIZE_BYTES:  500 * 1024 * 1024, // 500 MB
+    MAX_FILES_IN_ZIP:          10000,
+    MAX_COMPRESSION_RATIO:     100,
+    MAX_IMAGE_DIMENSION:       2000,
+    IMAGE_SCALE_FACTOR:        4
+};
+
+const C = _C || _FALLBACK_CONSTANTS;
+
+const MAX_FILE_SIZE         = C.MAX_FILE_SIZE_BYTES;
+const MAX_EXTRACTED_SIZE    = C.MAX_EXTRACTED_SIZE_BYTES;
+const MAX_FILES_IN_ZIP      = C.MAX_FILES_IN_ZIP;
+const MAX_COMPRESSION_RATIO = C.MAX_COMPRESSION_RATIO || 100;
+const MAX_IMAGE_DIMENSION   = C.MAX_IMAGE_DIMENSION;
+const IMAGE_SCALE_FACTOR    = C.IMAGE_SCALE_FACTOR;
+const DEFAULT_PRIORITY_CHARS = C.DEFAULT_PRIORITY_CHARS || '!';
+
+// -- Storage keys -----------------------------------------------------
 const SETTINGS_STORAGE_KEY = 'zipToPdfSettings';
 const HISTORY_STORAGE_KEY  = 'zipToPdfHistory';
 const THEME_STORAGE_KEY    = 'zipToPdfTheme';
 
-// Security limits — must match shared/constants.py
-const MAX_FILE_SIZE      = 200 * 1024 * 1024;  // 200 MB
-const MAX_EXTRACTED_SIZE = 500 * 1024 * 1024;  // 500 MB (ZIP bomb protection)
-const MAX_FILES_IN_ZIP   = 10000;
-const MAX_COMPRESSION_RATIO = 100;             // ZIP bomb heuristic
-
-// Image processing
-const MAX_IMAGE_DIMENSION = 2000;
-const IMAGE_SCALE_FACTOR  = 4;
-
-// Web-supported image formats (jsPDF constraints)
+// -- Web-specific constants -------------------------------------------
 const WEB_SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+const MAX_HISTORY_ENTRIES   = 20;
+const CONVERSION_THROTTLE_MS = 500;
 
-// MIME whitelist (validation croisée extension/MIME)
+// -- MIME whitelist for consistency validation ------------------------
 const MIME_WHITELIST = {
     '.jpg':  ['image/jpeg'],
     '.jpeg': ['image/jpeg'],
@@ -48,19 +73,41 @@ const MIME_WHITELIST = {
     '.zip':  ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', '']
 };
 
-// History cap
-const MAX_HISTORY_ENTRIES = 20;
+// =====================================================================
+// § 01 — SHARED LOGIC ALIASES (with graceful fallback)
+// =====================================================================
 
-// Throttle for conversions (anti-spam)
-const CONVERSION_THROTTLE_MS = 500;
+const _S = (typeof window.NexusSorting !== 'undefined' && window.NexusSorting)
+    ? window.NexusSorting
+    : null;
+
+const sharedIsImageFile = (_S && typeof _S.isImageFile === 'function')
+    ? _S.isImageFile
+    : function fallbackIsImageFile(name) {
+        if (!name) return false;
+        const ext = String(name).toLowerCase().match(/\.[a-z0-9]+$/);
+        return !!ext && C.IMAGE_EXTENSIONS.includes(ext[0]);
+    };
+
+const sharedSortImages = (_S && typeof _S.sortImages === 'function')
+    ? _S.sortImages
+    : function fallbackSortImages(files) {
+        return Array.isArray(files) ? files.slice().sort() : [];
+    };
+
+const sharedGetBasename = (_S && typeof _S.getBasename === 'function')
+    ? _S.getBasename
+    : function fallbackGetBasename(p) {
+        return String(p || '').split(/[\\/]/).pop() || '';
+    };
 
 // =====================================================================
-// § 01 — STATE
+// § 02 — STATE
 // =====================================================================
 
 /**
- * Global application state. Kept in a single object for easy inspection
- * via `window.__nexus.state` in tests / DevTools.
+ * Global application state. Kept in a single object for easy
+ * introspection via `window.__nexus.state` in tests / DevTools.
  */
 const state = {
     files: new Map(),        // Map<fileId, FileRecord>
@@ -70,10 +117,8 @@ const state = {
 
     settings: {
         useNaturalSort: true,
-        priorityChars: (typeof DEFAULT_PRIORITY_CHARS !== 'undefined')
-            ? DEFAULT_PRIORITY_CHARS
-            : '!',
-        theme: 'nexus',       // 'nexus' | 'light'
+        priorityChars: DEFAULT_PRIORITY_CHARS,
+        theme: 'nexus',
         showPreviews: true,
         autoRetry: true
     },
@@ -89,17 +134,17 @@ const state = {
         }
     },
 
-    history: [] // Array<{ts, filename, pages, size}>
+    history: [] // Array<{ts, filename, pages, duration, bytes}>
 };
 
-// Cleanup registry — track object URLs to revoke on error / cancel
+// -- URL registry (for cleanup) ---------------------------------------
 const urlRegistry = new Set();
 
-// Abort controller for in-flight conversions
+// -- Abort controller for in-flight conversions -----------------------
 let currentAbort = null;
 
 // =====================================================================
-// § 02 — UTILITIES
+// § 03 — UTILITIES
 // =====================================================================
 
 /**
@@ -130,7 +175,7 @@ function formatFileSize(bytes) {
  * Format a duration (ms) into a compact human-readable string.
  */
 function formatDuration(ms) {
-    if (ms < 1000) return `${Math.round(ms)}ms`;
+    if (!ms || ms < 1000) return `${Math.round(ms || 0)}ms`;
     if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
     const min = Math.floor(ms / 60000);
     const sec = Math.round((ms % 60000) / 1000);
@@ -139,7 +184,6 @@ function formatDuration(ms) {
 
 /**
  * Get lowercase extension including the dot, or '' if none.
- * Handles both POSIX and Windows separators.
  */
 function getExtension(filename) {
     const base = String(filename).split(/[\\/]/).pop() || '';
@@ -148,10 +192,10 @@ function getExtension(filename) {
 }
 
 /**
- * Get basename from a path with any separator.
+ * Get basename from a path with any separator (delegates to shared).
  */
 function getBasename(filepath) {
-    return String(filepath || '').split(/[\\/]/).pop() || '';
+    return sharedGetBasename(filepath);
 }
 
 /**
@@ -190,24 +234,22 @@ function isZipFile(file) {
 
 /**
  * Cross-validate extension vs MIME for a given file.
- * Returns true if the MIME is acceptable (or unknown — fail-open).
  */
 function isMimeConsistent(file) {
     const ext = getExtension(file.name);
     const mime = (file.type || '').toLowerCase();
     const allowed = MIME_WHITELIST[ext];
-    if (!allowed) return true; // unknown ext — let caller decide
-    if (!mime) return true;    // browser didn't provide — fail-open
+    if (!allowed) return true;
+    if (!mime) return true;
     return allowed.includes(mime);
 }
 
 /**
  * Compute a SHA-256 hash of a File for deduplication.
- * Falls back to a cheap fingerprint if SubtleCrypto is unavailable.
  */
 async function hashFile(file) {
     try {
-        if (window.crypto?.subtle && file.arrayBuffer) {
+        if (window.crypto && window.crypto.subtle && file.arrayBuffer) {
             const buf = await file.arrayBuffer();
             const digest = await crypto.subtle.digest('SHA-256', buf);
             return Array.from(new Uint8Array(digest))
@@ -215,21 +257,7 @@ async function hashFile(file) {
                 .join('');
         }
     } catch (_) { /* fall through */ }
-    // Fallback: name + size + lastModified
     return `fp:${file.name}:${file.size}:${file.lastModified}`;
-}
-
-/**
- * Throttle helper.
- */
-function throttle(fn, wait) {
-    let last = 0;
-    return function throttled(...args) {
-        const now = Date.now();
-        if (now - last < wait) return false;
-        last = now;
-        return fn.apply(this, args);
-    };
 }
 
 /**
@@ -244,7 +272,7 @@ function debounce(fn, wait) {
 }
 
 /**
- * Simple unique ID generator.
+ * Unique ID generator.
  */
 function uid(prefix = 'id') {
     return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -259,6 +287,15 @@ function registerUrl(url) {
 }
 
 /**
+ * Revoke a single tracked URL.
+ */
+function revokeUrl(url) {
+    if (!url) return;
+    try { URL.revokeObjectURL(url); } catch (_) { /* noop */ }
+    urlRegistry.delete(url);
+}
+
+/**
  * Revoke all tracked object URLs.
  */
 function revokeAllUrls() {
@@ -268,17 +305,8 @@ function revokeAllUrls() {
     urlRegistry.clear();
 }
 
-/**
- * Revoke a single tracked URL.
- */
-function revokeUrl(url) {
-    if (!url) return;
-    try { URL.revokeObjectURL(url); } catch (_) { /* noop */ }
-    urlRegistry.delete(url);
-}
-
 // =====================================================================
-// § 03 — TOAST SYSTEM (stackable, non-blocking)
+// § 04 — TOAST SYSTEM
 // =====================================================================
 
 /**
@@ -290,6 +318,7 @@ function ensureToastContainer() {
         c = document.createElement('div');
         c.id = 'nexus-toasts';
         c.className = 'toast-stack';
+        c.setAttribute('aria-live', 'polite');
         document.body.appendChild(c);
     }
     return c;
@@ -297,17 +326,14 @@ function ensureToastContainer() {
 
 /**
  * Push a toast notification.
- * @param {'success'|'error'|'warning'|'info'} type
- * @param {string} title
- * @param {string} [message]
- * @param {number} [timeout] ms — 0 = sticky
  */
 function pushToast(type, title, message = '', timeout = 4500) {
     const container = ensureToastContainer();
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', 'status');
     toast.innerHTML = `
-        <div class="toast-bar"></div>
+        <div class="toast-bar" aria-hidden="true"></div>
         <div class="toast-body">
             <div class="toast-title">${escapeHtml(title)}</div>
             ${message ? `<div class="toast-msg">${escapeHtml(message)}</div>` : ''}
@@ -320,15 +346,16 @@ function pushToast(type, title, message = '', timeout = 4500) {
         setTimeout(() => toast.remove(), 300);
     };
 
-    toast.querySelector('.toast-close').addEventListener('click', dismiss);
-    container.appendChild(toast);
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) closeBtn.addEventListener('click', dismiss);
 
+    container.appendChild(toast);
     if (timeout > 0) setTimeout(dismiss, timeout);
     return toast;
 }
 
 // =====================================================================
-// § 04 — NOTIFICATIONS (modal)
+// § 05 — NOTIFICATION MODAL
 // =====================================================================
 
 function showNotification(type, title, message) {
@@ -337,7 +364,7 @@ function showNotification(type, title, message) {
     const titleElement   = document.getElementById('notificationTitle');
     const messageElement = document.getElementById('notificationMessage');
 
-    if (!modal) return;
+    if (!modal || !iconContainer || !titleElement || !messageElement) return;
 
     const icons = {
         success: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`,
@@ -347,7 +374,7 @@ function showNotification(type, title, message) {
     };
 
     iconContainer.innerHTML = icons[type] || icons.info;
-    iconContainer.className = 'notification-icon ' + type;
+    iconContainer.className = 'notification-icon ' + (type || 'info');
 
     titleElement.textContent   = title;
     messageElement.textContent = message;
@@ -361,7 +388,7 @@ function hideNotification() {
 }
 
 // =====================================================================
-// § 05 — PROGRESS MODAL
+// § 06 — PROGRESS MODAL
 // =====================================================================
 
 function showProgressModal(show = true) {
@@ -372,7 +399,6 @@ function showProgressModal(show = true) {
 
 /**
  * Update progress modal.
- * @param {{current:number,total:number,stage:string,detail?:string,eta?:number}} info
  */
 function updateProgress(info) {
     const progressInfo = document.getElementById('progressInfo');
@@ -427,14 +453,25 @@ function throwIfCancelled() {
 }
 
 // =====================================================================
-// § 06 — IMAGE PREVIEW / THUMBNAIL
+// § 07 — IMAGE HELPERS
 // =====================================================================
 
 /**
- * Generate a small thumbnail data URL from a File/Blob.
- * Returns null on failure (best-effort).
+ * Load an <img> from a URL, resolving with the loaded HTMLImageElement.
  */
-async function makeThumbnail(file, maxSide = 160) {
+function loadImage(imageUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload  = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image: ${imageUrl}`));
+        img.src = imageUrl;
+    });
+}
+
+/**
+ * Generate a small thumbnail data URL from a File/Blob.
+ */
+async function makeThumbnail(file, maxSide = 96) {
     try {
         const url = registerUrl(URL.createObjectURL(file));
         const img = await loadImage(url);
@@ -458,19 +495,7 @@ async function makeThumbnail(file, maxSide = 160) {
 }
 
 /**
- * Load an <img> from a URL, resolving with the loaded HTMLImageElement.
- */
-function loadImage(imageUrl) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload  = () => resolve(img);
-        img.onerror = () => reject(new Error(`Failed to load image: ${imageUrl}`));
-        img.src = imageUrl;
-    });
-}
-
-/**
- * Compute PDF page size in points for an image, respecting max dimension.
+ * Compute PDF page size in points for an image.
  */
 function computePageSize(img) {
     let scale = 1;
@@ -488,15 +513,11 @@ function computePageSize(img) {
 }
 
 // =====================================================================
-// § 07 — ZIP EXTRACTION
+// § 08 — ZIP INSPECTION & EXTRACTION
 // =====================================================================
 
 /**
  * Inspect a ZIP file — returns metadata without extracting image data.
- * Useful for showing a preview before the user commits to conversion.
- *
- * @param {File} zipFile
- * @returns {Promise<{total:number,images:number,dirs:number,size:number,names:string[]}>}
  */
 async function inspectZip(zipFile) {
     const zip = new JSZip();
@@ -510,13 +531,14 @@ async function inspectZip(zipFile) {
     Object.keys(zipData.files).forEach(filename => {
         const entry = zipData.files[filename];
         if (entry.dir) { dirs++; return; }
-
         if (filename.includes('..') || filename.startsWith('/')) return;
-        if (!isImageFile(filename)) return;
+        if (!sharedIsImageFile(filename)) return;
         if (!isSupportedWebFormat(filename)) return;
 
         images++;
-        totalSize += entry._data?.uncompressedSize || 0;
+        totalSize += entry._data && entry._data.uncompressedSize
+            ? entry._data.uncompressedSize
+            : 0;
         if (names.length < 50) names.push(filename);
     });
 
@@ -530,11 +552,7 @@ async function inspectZip(zipFile) {
 }
 
 /**
- * Extract all supported images from a ZIP, applying all security checks.
- *
- * @param {File} zipFile
- * @param {(p:{current:number,total:number,stage:string})=>void} [progressCallback]
- * @returns {Promise<Array<{filename:string,data:Blob,url:string}>>}
+ * Extract all supported images from a ZIP with full security checks.
  */
 async function extractImagesFromZip(zipFile, progressCallback) {
     const zip = new JSZip();
@@ -543,9 +561,8 @@ async function extractImagesFromZip(zipFile, progressCallback) {
     const imageFiles = [];
     const fileList = Object.keys(zipData.files);
     let totalExtractedSize = 0;
-    let totalCompressedSize = 0;
 
-    // Pass 1 — security & filtering
+    // ---- Pass 1: security & filtering ----
     for (const filename of fileList) {
         throwIfCancelled();
         const entry = zipData.files[filename];
@@ -557,17 +574,21 @@ async function extractImagesFromZip(zipFile, progressCallback) {
             continue;
         }
 
-        if (!isImageFile(filename)) continue;
+        // Must be shared-image AND web-supported
+        if (!sharedIsImageFile(filename)) continue;
         if (!isSupportedWebFormat(filename)) {
             console.warn(`Skipping unsupported format: ${filename}`);
             continue;
         }
 
-        const uncompressed = entry._data?.uncompressedSize || 0;
-        const compressed   = entry._data?.compressedSize   || 0;
+        const uncompressed = entry._data && entry._data.uncompressedSize
+            ? entry._data.uncompressedSize
+            : 0;
+        const compressed = entry._data && entry._data.compressedSize
+            ? entry._data.compressedSize
+            : 0;
 
-        totalExtractedSize  += uncompressed;
-        totalCompressedSize += compressed;
+        totalExtractedSize += uncompressed;
 
         if (totalExtractedSize > MAX_EXTRACTED_SIZE) {
             throw new Error(
@@ -576,10 +597,9 @@ async function extractImagesFromZip(zipFile, progressCallback) {
             );
         }
 
-        // Compression ratio heuristic
         if (compressed > 0 && uncompressed / compressed > MAX_COMPRESSION_RATIO) {
             throw new Error(
-                `Suspicious compression ratio detected ` +
+                `Suspicious compression ratio ` +
                 `(${Math.round(uncompressed / compressed)}:1). Possible ZIP bomb.`
             );
         }
@@ -597,14 +617,14 @@ async function extractImagesFromZip(zipFile, progressCallback) {
         throw new Error('No image files found in ZIP archive.');
     }
 
-    // Sort via shared logic
-    const sortedImages = sortImages(
+    // ---- Sort via shared logic ----
+    const sortedImages = sharedSortImages(
         imageFiles,
         state.settings.useNaturalSort,
         state.settings.priorityChars
     );
 
-    // Pass 2 — extract
+    // ---- Pass 2: extract ----
     const images = [];
     for (let i = 0; i < sortedImages.length; i++) {
         throwIfCancelled();
@@ -627,7 +647,7 @@ async function extractImagesFromZip(zipFile, progressCallback) {
 }
 
 // =====================================================================
-// § 08 — PDF CONVERSION
+// § 09 — PDF CONVERSION
 // =====================================================================
 
 /**
@@ -643,7 +663,6 @@ async function convertImagesToPDF(images, outputFilename, progressCallback) {
     const started = performance.now();
 
     try {
-        // First page
         const firstImg = await loadImage(images[0].url);
         const firstSize = computePageSize(firstImg);
 
@@ -668,7 +687,6 @@ async function convertImagesToPDF(images, outputFilename, progressCallback) {
             progressCallback({ current: 1, total: images.length, stage: 'converting' });
         }
 
-        // Remaining pages
         for (let i = 1; i < images.length; i++) {
             throwIfCancelled();
             const img = await loadImage(images[i].url);
@@ -701,29 +719,24 @@ async function convertImagesToPDF(images, outputFilename, progressCallback) {
 
         pdf.save(outputFilename);
 
-        // Update stats + history
         const duration = performance.now() - started;
         recordConversion({
             filename: outputFilename,
             pages: images.length,
             duration,
-            bytes: images.reduce((s, im) => s + (im.data?.size || 0), 0)
+            bytes: images.reduce((s, im) => s + ((im.data && im.data.size) || 0), 0)
         });
 
         return { success: true, duration };
     } finally {
-        // Always clean up URLs
         images.forEach(i => revokeUrl(i.url));
     }
 }
 
 // =====================================================================
-// § 09 — HISTORY + STATS
+// § 10 — HISTORY + STATS
 // =====================================================================
 
-/**
- * Record a successful conversion in history + stats.
- */
 function recordConversion({ filename, pages, duration, bytes }) {
     state.runtime.stats.totalConverted++;
     state.runtime.stats.totalPages += pages;
@@ -740,12 +753,9 @@ function recordConversion({ filename, pages, duration, bytes }) {
 
     try {
         localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(state.history));
-    } catch (_) { /* quota — ignore */ }
+    } catch (_) { /* quota */ }
 }
 
-/**
- * Load history from localStorage.
- */
 function loadHistory() {
     try {
         const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -755,18 +765,13 @@ function loadHistory() {
     }
 }
 
-/**
- * Clear history.
- */
 function clearHistory() {
     state.history = [];
     try { localStorage.removeItem(HISTORY_STORAGE_KEY); } catch (_) {}
+    renderHistory();
     pushToast('info', 'History cleared');
 }
 
-/**
- * Render the history log into a container if it exists.
- */
 function renderHistory() {
     const host = document.getElementById('nexus-history');
     if (!host) return;
@@ -787,12 +792,9 @@ function renderHistory() {
 }
 
 // =====================================================================
-// § 10 — CONVERSION WORKFLOWS
+// § 11 — CONVERSION LOCK (anti-overlap + throttle)
 // =====================================================================
 
-/**
- * Guard — avoid overlapping conversions.
- */
 function acquireConversionLock() {
     const now = Date.now();
     if (state.runtime.isConverting) {
@@ -814,6 +816,10 @@ function releaseConversionLock() {
     state.runtime.cancelRequested = false;
     currentAbort = null;
 }
+
+// =====================================================================
+// § 12 — CONVERSION WORKFLOWS
+// =====================================================================
 
 /**
  * Convert a single ZIP to PDF.
@@ -873,7 +879,8 @@ async function convertAllToPDF() {
         const images = [];
         for (let i = 0; i < state.imageFiles.length; i++) {
             throwIfCancelled();
-            const { file } = state.imageFiles[i];
+            const entry = state.imageFiles[i];
+            const file = entry && entry.file;
             if (!file) continue;
 
             const url = registerUrl(URL.createObjectURL(file));
@@ -888,8 +895,7 @@ async function convertAllToPDF() {
 
         if (images.length === 0) throw new Error('No valid images to convert.');
 
-        // Sort via shared logic
-        const sortedFilenames = sortImages(
+        const sortedFilenames = sharedSortImages(
             images.map(i => i.filename),
             state.settings.useNaturalSort,
             state.settings.priorityChars
@@ -1018,8 +1024,7 @@ async function convertAllZipsToSinglePDF() {
     try {
         showProgressModal(true);
 
-        // Sort ZIPs by filename
-        const sortedNames = sortImages(
+        const sortedNames = sharedSortImages(
             zipFiles.map(({ fileData }) => fileData.file.name),
             state.settings.useNaturalSort,
             state.settings.priorityChars
@@ -1074,15 +1079,9 @@ async function convertAllZipsToSinglePDF() {
 }
 
 // =====================================================================
-// § 11 — FILE MANAGEMENT
+// § 13 — FILE MANAGEMENT
 // =====================================================================
 
-/**
- * Add a file to state.
- * @param {File} file
- * @param {'zip'|'image'} type
- * @param {{hash?:string, thumbnail?:object, zipMeta?:object}} [meta]
- */
 function addFile(file, type = 'zip', meta = {}) {
     const fileId = state.currentFileId++;
     state.files.set(fileId, {
@@ -1104,15 +1103,11 @@ function addFile(file, type = 'zip', meta = {}) {
     return fileId;
 }
 
-/**
- * Remove a file by ID.
- */
 function removeFile(fileId) {
     const rec = state.files.get(fileId);
     if (!rec) return;
 
-    // Revoke thumbnail URLs
-    if (rec.thumbnail?.dataUrl?.startsWith('blob:')) {
+    if (rec.thumbnail && rec.thumbnail.dataUrl && rec.thumbnail.dataUrl.startsWith('blob:')) {
         revokeUrl(rec.thumbnail.dataUrl);
     }
 
@@ -1126,9 +1121,6 @@ function removeFile(fileId) {
     renderStats();
 }
 
-/**
- * Reorder files by moving srcId before dstId.
- */
 function reorderFiles(srcId, dstId) {
     if (srcId === dstId) return;
 
@@ -1142,7 +1134,6 @@ function reorderFiles(srcId, dstId) {
 
     state.files = new Map(entries);
 
-    // Keep imageFiles in sync with new order
     state.imageFiles = Array.from(state.files.entries())
         .filter(([_, d]) => d.type === 'image')
         .map(([fileId, d]) => ({ fileId, file: d.file }));
@@ -1150,39 +1141,60 @@ function reorderFiles(srcId, dstId) {
     renderFileList();
 }
 
+function clearAllFiles() {
+    if (state.files.size === 0) return;
+
+    const run = async () => {
+        let confirmed = true;
+        if (typeof window.nexusConfirm === 'function') {
+            confirmed = await window.nexusConfirm('Remove all files from the queue?');
+        }
+        if (!confirmed) return;
+
+        state.files.clear();
+        state.imageFiles = [];
+        revokeAllUrls();
+        renderFileList();
+        renderStats();
+        pushToast('info', 'Queue cleared');
+    };
+
+    run();
+}
+
 // =====================================================================
-// § 12 — RENDER
+// § 14 — RENDER
 // =====================================================================
 
-/**
- * Build the bulk-actions HTML.
- */
 function renderBulkActions(zipCount, imageCount) {
     let html = '';
 
     if (zipCount > 1) {
         html += `
             <button type="button" class="btn btn-primary btn-convert-all" onclick="convertAllZipsIndividually()">
-                <span class="btn-glow"></span>⚡ CONVERT EACH
+                <span class="btn-glow" aria-hidden="true"></span>
+                <svg class="btn-icon" aria-hidden="true"><use href="#i-zap"/></svg>
+                CONVERT EACH
             </button>
             <button type="button" class="btn btn-primary btn-convert-all btn-merge" onclick="convertAllZipsToSinglePDF()">
-                <span class="btn-glow"></span>⬢ MERGE ALL
+                <span class="btn-glow" aria-hidden="true"></span>
+                <svg class="btn-icon" aria-hidden="true"><use href="#i-merge"/></svg>
+                MERGE ALL
             </button>`;
     }
 
     if (imageCount > 1) {
         html += `
             <button type="button" class="btn btn-primary btn-convert-all" onclick="convertAllToPDF()">
-                <span class="btn-glow"></span>⚡ CONVERT IMAGES
+                <span class="btn-glow" aria-hidden="true"></span>
+                <svg class="btn-icon" aria-hidden="true"><use href="#i-zap"/></svg>
+                CONVERT IMAGES
             </button>`;
     }
 
     return html;
 }
 
-/**
- * Build one file card.
- */
 function renderFileCard(fileId, fileData) {
     const isZip = fileData.type === 'zip';
     const badge = isZip ? 'ZIP' : 'IMG';
@@ -1191,8 +1203,7 @@ function renderFileCard(fileId, fileData) {
     const size = formatFileSize(fileData.file.size);
     const status = fileData.status || 'pending';
 
-    // Thumbnail (image only)
-    const thumb = fileData.thumbnail?.dataUrl
+    const thumb = (fileData.thumbnail && fileData.thumbnail.dataUrl)
         ? `<div class="file-thumb"><img src="${fileData.thumbnail.dataUrl}" alt=""></div>`
         : `<div class="file-thumb file-thumb-placeholder">${badge}</div>`;
 
@@ -1201,7 +1212,7 @@ function renderFileCard(fileId, fileData) {
              data-file-id="${fileId}"
              data-type="${fileData.type}"
              draggable="true">
-            <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+            <div class="drag-handle" title="Drag to reorder" aria-hidden="true">⋮⋮</div>
             ${thumb}
             <div class="file-info">
                 <div class="file-name" title="${safeName}">${safeName}</div>
@@ -1209,23 +1220,22 @@ function renderFileCard(fileId, fileData) {
                     <span class="file-size">${size}</span>
                     <span class="meta-sep">//</span>
                     <span class="file-status status-${status}">
-                        <span class="status-dot-mini"></span>${status.toUpperCase()}
+                        <span class="status-dot-mini" aria-hidden="true"></span>
+                        ${status.toUpperCase()}
                     </span>
                 </div>
             </div>
             <div class="file-actions">
                 ${isZip ? `
-                    <button type="button" class="btn btn-convert" onclick="convertZipToPDF(${fileId})">
-                        <span class="btn-glow"></span>⚡ CONVERT
+                    <button type="button" class="btn btn-convert" onclick="convertZipToPDF(${fileId})" title="Convert to PDF">
+                        <span class="btn-glow" aria-hidden="true"></span>
+                        ⚡ CONVERT
                     </button>` : ''}
                 <button type="button" class="btn btn-remove" onclick="removeFile(${fileId})" aria-label="Remove file" title="Remove">✕</button>
             </div>
         </div>`;
 }
 
-/**
- * Render the file list + bulk action buttons.
- */
 function renderFileList() {
     const fileList          = document.getElementById('fileList');
     const convertAllSection = document.getElementById('convertAllSection');
@@ -1242,7 +1252,6 @@ function renderFileList() {
     const zipCount = Array.from(state.files.values()).filter(f => f.type === 'zip').length;
     const imageCount = state.imageFiles.length;
 
-    // Bulk actions
     if (buttonGroup && convertAllSection) {
         const html = renderBulkActions(zipCount, imageCount);
         if (html) {
@@ -1253,7 +1262,6 @@ function renderFileList() {
         }
     }
 
-    // Cards
     const cards = [];
     state.files.forEach((fileData, fileId) => {
         cards.push(renderFileCard(fileId, fileData));
@@ -1261,13 +1269,9 @@ function renderFileList() {
 
     fileList.innerHTML = `<div class="file-list-inner">${cards.join('')}</div>`;
 
-    // Wire drag & drop
     wireDragAndDrop();
 }
 
-/**
- * Wire drag & drop reorder on file items.
- */
 function wireDragAndDrop() {
     const items = document.querySelectorAll('.file-item');
 
@@ -1306,9 +1310,6 @@ function wireDragAndDrop() {
     });
 }
 
-/**
- * Render live stats if a HUD element exists.
- */
 function renderStats() {
     const host = document.getElementById('nexus-stats');
     if (!host) return;
@@ -1343,19 +1344,14 @@ function renderStats() {
 }
 
 // =====================================================================
-// § 13 — FILE INPUT HANDLING
+// § 15 — FILE INPUT HANDLING
 // =====================================================================
 
-/**
- * Process a FileList / array of File objects, with validation,
- * deduplication and preview generation.
- */
 async function handleFiles(files) {
     const list = Array.from(files || []);
     if (list.length === 0) return;
 
     for (const file of list) {
-        // 1) Type validation
         const zip = isZipFile(file);
         const img = isSupportedWebFormat(file.name);
 
@@ -1369,13 +1365,11 @@ async function handleFiles(files) {
             continue;
         }
 
-        // 2) MIME consistency
         if (!isMimeConsistent(file)) {
             pushToast('warning', 'MIME mismatch', file.name);
             continue;
         }
 
-        // 3) Size check
         if (file.size > MAX_FILE_SIZE) {
             showNotification(
                 'warning',
@@ -1385,7 +1379,6 @@ async function handleFiles(files) {
             continue;
         }
 
-        // 4) Dedup via hash
         const hash = await hashFile(file);
         const dup = Array.from(state.files.values()).some(r => r.hash === hash);
         if (dup) {
@@ -1393,20 +1386,17 @@ async function handleFiles(files) {
             continue;
         }
 
-        // 5) Thumbnail (image only)
         let thumbnail = null;
         if (img && state.settings.showPreviews) {
             thumbnail = await makeThumbnail(file, 96);
         }
 
-        // 6) ZIP preview metadata (best-effort)
         let zipMeta = null;
         if (zip) {
             try { zipMeta = await inspectZip(file); }
             catch (err) { console.warn('ZIP inspect failed:', err); }
         }
 
-        // 7) Add
         addFile(file, zip ? 'zip' : 'image', { hash, thumbnail, zipMeta });
 
         if (zipMeta) {
@@ -1422,7 +1412,7 @@ async function handleFiles(files) {
 }
 
 // =====================================================================
-// § 14 — SETTINGS
+// § 16 — SETTINGS
 // =====================================================================
 
 function saveSettings() {
@@ -1439,7 +1429,7 @@ function loadSettings() {
         if (!raw) return;
         const parsed = JSON.parse(raw);
         state.settings.useNaturalSort = parsed.useNaturalSort ?? true;
-        state.settings.priorityChars   = parsed.priorityChars ?? '!';
+        state.settings.priorityChars   = parsed.priorityChars ?? DEFAULT_PRIORITY_CHARS;
         state.settings.theme           = parsed.theme ?? 'nexus';
         state.settings.showPreviews    = parsed.showPreviews ?? true;
         state.settings.autoRetry       = parsed.autoRetry ?? true;
@@ -1465,9 +1455,7 @@ function applySettingsToUI() {
 
 function resetSettings() {
     state.settings.useNaturalSort = true;
-    state.settings.priorityChars = (typeof DEFAULT_PRIORITY_CHARS !== 'undefined')
-        ? DEFAULT_PRIORITY_CHARS
-        : '!';
+    state.settings.priorityChars = DEFAULT_PRIORITY_CHARS;
 
     applySettingsToUI();
     saveSettings();
@@ -1475,99 +1463,82 @@ function resetSettings() {
     showNotification('info', 'Settings Reset', 'Settings have been reset to default values.');
 }
 
-/**
- * Apply theme class to <html> for optional light-mode support.
- */
-function applyTheme() {
-    document.documentElement.dataset.theme = state.settings.theme || 'nexus';
-}
-
 // =====================================================================
-// § 15 — KEYBOARD SHORTCUTS
+// § 17 — KEYBOARD SHORTCUTS (business logic side)
 // =====================================================================
 
 function wireKeyboard() {
     document.addEventListener('keydown', (e) => {
-        // Ignore when typing in an input
         const tag = (e.target.tagName || '').toLowerCase();
         const typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
 
-        // Ctrl/Cmd + O — open file picker
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
             e.preventDefault();
-            document.getElementById('fileInput')?.click();
+            const fi = document.getElementById('fileInput');
+            if (fi) fi.click();
             return;
         }
 
-        // Ctrl/Cmd + Shift + X — clear all
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'x') {
             e.preventDefault();
             clearAllFiles();
             return;
         }
 
-        // Esc — close modals
         if (e.key === 'Escape') {
-            hideNotification();
             if (state.runtime.isConverting) requestCancel();
             return;
         }
 
-        // Delete — remove last selected? (no selection model yet, skip if typing)
         if (e.key === 'Delete' && !typing) {
-            // Placeholder: could remove focused card
+            /* Reserved for future selection model */
         }
     });
 }
 
-/**
- * Clear all files.
- */
-function clearAllFiles() {
-    if (state.files.size === 0) return;
-    if (!confirm('Remove all files from the queue?')) return;
-    state.files.clear();
-    state.imageFiles = [];
-    revokeAllUrls();
-    renderFileList();
-    renderStats();
-    pushToast('info', 'Queue cleared');
-}
-
 // =====================================================================
-// § 16 — INIT
+// § 18 — INITIALIZATION
 // =====================================================================
 
 function init() {
-    // ---- DOM refs ----
-    const dropZone           = document.getElementById('dropZone');
-    const fileInput          = document.getElementById('fileInput');
-    const naturalSortEnabled = document.getElementById('naturalSortEnabled');
-    const priorityChars      = document.getElementById('priorityChars');
-    const resetSettingsBtn   = document.getElementById('resetSettingsBtn');
+    const dropZone             = document.getElementById('dropZone');
+    const fileInput            = document.getElementById('fileInput');
+    const naturalSortEnabled   = document.getElementById('naturalSortEnabled');
+    const priorityChars        = document.getElementById('priorityChars');
+    const resetSettingsBtn     = document.getElementById('resetSettingsBtn');
     const notificationCloseBtn = document.getElementById('notificationCloseBtn');
-    const notificationModal  = document.getElementById('notificationModal');
+    const notificationModal    = document.getElementById('notificationModal');
+    const clearHistoryBtn      = document.getElementById('clearHistoryBtn');
+    const progressCancelBtn    = document.getElementById('progressCancelBtn');
 
-    // ---- Load persisted state ----
     loadSettings();
     loadHistory();
     applySettingsToUI();
-    applyTheme();
 
-    // ---- Settings handlers ----
-    if (naturalSortEnabled) naturalSortEnabled.addEventListener('change', updateSettings);
-    if (priorityChars) priorityChars.addEventListener('input', debounce(updateSettings, 250));
-    if (resetSettingsBtn) resetSettingsBtn.addEventListener('click', resetSettings);
-
-    // ---- Notification modal ----
-    if (notificationCloseBtn) notificationCloseBtn.addEventListener('click', hideNotification);
+    if (naturalSortEnabled) {
+        naturalSortEnabled.addEventListener('change', updateSettings);
+    }
+    if (priorityChars) {
+        priorityChars.addEventListener('input', debounce(updateSettings, 250));
+    }
+    if (resetSettingsBtn) {
+        resetSettingsBtn.addEventListener('click', resetSettings);
+    }
+    if (notificationCloseBtn) {
+        notificationCloseBtn.addEventListener('click', hideNotification);
+    }
     if (notificationModal) {
         notificationModal.addEventListener('click', (e) => {
             if (e.target === notificationModal) hideNotification();
         });
     }
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', clearHistory);
+    }
+    if (progressCancelBtn) {
+        progressCancelBtn.addEventListener('click', requestCancel);
+    }
 
-    // ---- File input ----
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             handleFiles(e.target.files);
@@ -1575,10 +1546,11 @@ function init() {
         });
     }
 
-    // ---- Drop zone ----
     if (dropZone) {
         dropZone.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'BUTTON') fileInput?.click();
+            if (e.target.tagName !== 'BUTTON') {
+                if (fileInput) fileInput.click();
+            }
         });
 
         dropZone.addEventListener('dragover', (e) => {
@@ -1598,22 +1570,14 @@ function init() {
         });
     }
 
-    // ---- Cancel button (if exists) ----
-    const cancelBtn = document.getElementById('progressCancelBtn');
-    if (cancelBtn) cancelBtn.addEventListener('click', requestCancel);
-
-    // ---- Keyboard ----
     wireKeyboard();
 
-    // ---- Render ----
     renderFileList();
     renderStats();
     renderHistory();
 
-    // ---- Welcome ----
     pushToast('info', `NEXUS ${APP_CODENAME} v${APP_VERSION}`, 'Drop ZIPs or images to begin.', 4000);
 
-    // ---- Unload cleanup ----
     window.addEventListener('beforeunload', () => {
         revokeAllUrls();
     });
@@ -1626,7 +1590,7 @@ function init() {
 }
 
 // =====================================================================
-// § 17 — BOOTSTRAP
+// § 19 — BOOTSTRAP
 // =====================================================================
 
 if (document.readyState === 'loading') {
@@ -1636,10 +1600,10 @@ if (document.readyState === 'loading') {
 }
 
 // =====================================================================
-// § 18 — GLOBAL EXPORTS
+// § 20 — GLOBAL EXPORTS
 // =====================================================================
 
-// For inline onclick handlers
+// -- For inline onclick handlers in index.html -------------------------
 window.convertZipToPDF            = convertZipToPDF;
 window.convertAllToPDF            = convertAllToPDF;
 window.convertAllZipsIndividually = convertAllZipsIndividually;
@@ -1650,11 +1614,13 @@ window.clearAllFiles              = clearAllFiles;
 window.requestCancel              = requestCancel;
 window.clearHistory               = clearHistory;
 
-// For tests / DevTools introspection
+// -- For tests / DevTools introspection --------------------------------
 window.__nexus = {
     version: APP_VERSION,
     codename: APP_CODENAME,
+
     state,
+
     constants: {
         MAX_FILE_SIZE,
         MAX_EXTRACTED_SIZE,
@@ -1664,8 +1630,10 @@ window.__nexus = {
         IMAGE_SCALE_FACTOR,
         WEB_SUPPORTED_FORMATS,
         MAX_HISTORY_ENTRIES,
-        CONVERSION_THROTTLE_MS
+        CONVERSION_THROTTLE_MS,
+        DEFAULT_PRIORITY_CHARS
     },
+
     utils: {
         escapeHtml,
         formatFileSize,
@@ -1677,10 +1645,10 @@ window.__nexus = {
         isZipFile,
         isMimeConsistent,
         hashFile,
-        throttle,
         debounce,
         uid
     },
+
     actions: {
         handleFiles,
         renderFileList,
@@ -1695,6 +1663,7 @@ window.__nexus = {
         updateSettings,
         resetSettings
     },
+
     internals: {
         extractImagesFromZip,
         convertImagesToPDF,
@@ -1703,6 +1672,25 @@ window.__nexus = {
         loadImage,
         computePageSize,
         acquireConversionLock,
-        releaseConversionLock
+        releaseConversionLock,
+        pushToast,
+        showNotification,
+        hideNotification,
+        showProgressModal,
+        updateProgress
     }
 };
+
+// -- Diagnostics -------------------------------------------------------
+(function diagnostics() {
+    const missing = [];
+
+    if (!_C) missing.push('NexusConstants (using fallback)');
+    if (!_S) missing.push('NexusSorting (using fallback)');
+    if (typeof window.JSZip === 'undefined') missing.push('JSZip');
+    if (typeof window.jspdf === 'undefined') missing.push('jsPDF');
+
+    if (missing.length > 0) {
+        console.warn('[NEXUS] Load order issues:', missing);
+    }
+})();
