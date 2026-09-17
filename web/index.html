@@ -1,84 +1,190 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nexus">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#05060b">
-<title>NEXUS QUANTUM · ZIP → PDF</title>
-<meta name="description" content="Convert ZIP archives or image sets into a single PDF — entirely in your browser.">
-<meta name="author" content="NEXUS_QUANTUM">
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<meta property="og:type" content="website">
-<meta property="og:title" content="NEXUS QUANTUM · ZIP → PDF">
-<meta property="og:description" content="Convert archives into a single PDF, entirely in your browser.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:creator" content="@NEXUS_QUANTUM">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2305060b'/><path d='M7 21 L16 9 L25 21' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=JetBrains+Mono:wght@400;600&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+    <!-- ================================================================
+         META
+         ================================================================ -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#05060b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#eef2fb" media="(prefers-color-scheme: light)">
+
+    <title>NEXUS QUANTUM · ZIP → PDF</title>
+
+    <meta name="description" content="Convert ZIP archives or image sets into a single PDF — entirely in your browser. No uploads, no telemetry.">
+    <meta name="author" content="NEXUS_QUANTUM">
+    <meta name="contact" content="drxenon487@gmail.com">
+    <meta name="keywords" content="zip to pdf, images to pdf, client-side pdf, jszip, jspdf, nexus quantum, offline pdf converter, batch pdf, image batch">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="rating" content="general">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="application-name" content="NEXUS QUANTUM">
+    <meta name="generator" content="NEXUS-QUANTUM-v2.0.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <meta name="format-detection" content="address=no">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="NEXUS QUANTUM · ZIP → PDF">
+    <meta property="og:description" content="Convert archives into a single PDF, entirely in your browser.">
+    <meta property="og:site_name" content="NEXUS QUANTUM">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NEXUS QUANTUM · ZIP → PDF">
+    <meta name="twitter:description" content="Convert archives into a single PDF, entirely in your browser.">
+    <meta name="twitter:creator" content="@NEXUS_QUANTUM">
+    <meta name="twitter:site" content="@NEXUS_QUANTUM">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2305060b'/><path d='M7 21 L16 9 L25 21' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><circle cx='16' cy='17' r='2' fill='%23ff3cac'/></svg>">
+
+    <link rel="apple-touch-icon"
+          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2305060b'/><path d='M7 21 L16 9 L25 21' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+    <link rel="mask-icon"
+          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M7 21 L16 9 L25 21' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+          color="#00f0ff">
+
+    <!-- Resource hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&family=Rajdhani:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 
-<body data-app-version="2.0.0-nexus">
+<body data-app-version="2.0.0-nexus" data-app-codename="QUANTUM" data-app-author="NEXUS_QUANTUM">
 
 <!-- ====================================================================
-     SVG SPRITE — icônes compactes
+     SVG ICON SPRITE
      ==================================================================== -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true" focusable="false">
+
     <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
     </symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 13l4 4L19 7"/>
     </symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+
+    <symbol id="i-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 18L18 6M6 6l12 12"/>
     </symbol>
-    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
+
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </symbol>
+
     <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </symbol>
+
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    </symbol>
+
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    </symbol>
+
+    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2"/>
+        <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
+    </symbol>
+
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+
+    <symbol id="i-merge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+    </symbol>
+
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+    </symbol>
+
     <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.1c-3.2.7-3.87-1.37-3.87-1.37-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.26 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
     </symbol>
+
     <symbol id="i-x" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
     </symbol>
+
     <symbol id="i-instagram" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
     </symbol>
+
     <symbol id="i-discord" viewBox="0 0 24 24" fill="currentColor">
         <path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/>
     </symbol>
+
     <symbol id="i-youtube" viewBox="0 0 24 24" fill="currentColor">
         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
     </symbol>
+
     <symbol id="i-telegram" viewBox="0 0 24 24" fill="currentColor">
         <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
     </symbol>
+
     <symbol id="i-linkedin" viewBox="0 0 24 24" fill="currentColor">
         <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
     </symbol>
+
     <symbol id="i-tiktok" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
     </symbol>
+
     <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
     </symbol>
 </svg>
 
+<!-- ====================================================================
+     AMBIENT BACKGROUND
+     ==================================================================== -->
 <div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-cyan"></span>
+    <span class="orb orb-violet"></span>
+    <span class="orb orb-magenta"></span>
+</div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
 
+<noscript>
+    <div style="position:fixed;top:0;left:0;right:0;padding:14px;background:#ff4d6d;color:#fff;text-align:center;font-family:monospace;z-index:99999;">
+        ⚠ JavaScript is required — NEXUS QUANTUM runs entirely in your browser.
+    </div>
+</noscript>
+
+<!-- ====================================================================
+     CONTAINER
+     ==================================================================== -->
 <div class="container" style="max-width: 1200px;">
 
     <!-- ============================================================
-         TOPBAR — brand left · socials right
+         TOPBAR
          ============================================================ -->
     <div class="hud-header"
          style="padding: 14px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
@@ -95,7 +201,7 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <a href="https://github.com/Joker15-tech/NEXUS-ZIP-IMG-TO-PDFf" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank" rel="noopener noreferrer"
                class="icon-btn" title="GitHub" aria-label="GitHub" style="width: 28px; height: 28px;">
                 <svg style="width: 14px; height: 14px;"><use href="#i-github"/></svg>
             </a>
@@ -147,7 +253,7 @@
     </div>
 
     <!-- ============================================================
-         HERO — inline, compact
+         HERO
          ============================================================ -->
     <header style="padding: 0 4px 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
         <div>
@@ -167,15 +273,14 @@
     <main role="main">
 
         <!-- ============================================================
-             BENTO GRID — 2 colonnes
+             BENTO GRID
              ============================================================ -->
         <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px;"
              class="bento-grid">
 
-            <!-- ─── LEFT COLUMN ─── -->
+            <!-- LEFT COLUMN -->
             <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
 
-                <!-- UPLOAD -->
                 <section class="panel upload-section" style="margin: 0; padding: 20px 24px;"
                          aria-labelledby="uploadTitle">
                     <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
@@ -217,23 +322,19 @@
                     </div>
                 </section>
 
-                <!-- BULK ACTIONS -->
                 <section class="convert-all-section" id="convertAllSection"
                          style="display: none; margin: 0; padding: 12px 16px;"
                          aria-label="Bulk actions">
                     <div class="button-group" id="convertButtonGroup"></div>
                 </section>
 
-                <!-- FILE QUEUE -->
                 <section class="file-list" id="fileList"
                          style="margin: 0;" aria-live="polite" aria-label="File queue"></section>
-
             </div>
 
-            <!-- ─── RIGHT COLUMN ─── -->
+            <!-- RIGHT COLUMN -->
             <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
 
-                <!-- SETTINGS -->
                 <section class="panel settings-section" style="margin: 0; padding: 20px 24px;"
                          aria-labelledby="settingsTitle">
                     <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
@@ -271,7 +372,6 @@
                     </div>
                 </section>
 
-                <!-- RECENT ACTIVITY -->
                 <section class="panel info-section" style="margin: 0; padding: 20px 24px; flex: 1;"
                          aria-labelledby="historyTitle">
                     <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
@@ -289,13 +389,10 @@
                          aria-label="Conversion history"
                          style="font-size: 11px;"></div>
                 </section>
-
             </div>
         </div>
 
-        <!-- ============================================================
-             CAPABILITIES — inline compact strip
-             ============================================================ -->
+        <!-- CAPABILITIES -->
         <section class="panel info-section"
                  style="margin: 0 0 16px; padding: 16px 24px;"
                  aria-labelledby="featuresTitle">
@@ -330,12 +427,18 @@
                     <span class="feat-id" style="font-size: 9px;">06</span>
                     Drag-to-reorder · cancelable
                 </li>
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">07</span>
+                    Duplicate detection (SHA-256)
+                </li>
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">08</span>
+                    Live progress · ETA tracking
+                </li>
             </ul>
         </section>
 
-        <!-- ============================================================
-             SHORTCUTS (collapsible)
-             ============================================================ -->
+        <!-- SHORTCUTS -->
         <section class="panel info-section shortcuts-panel"
                  id="shortcutsPanel" hidden
                  style="margin: 0 0 16px; padding: 16px 24px;"
@@ -378,11 +481,10 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <!-- ============================================================
-         FOOTER — dense socials
+         FOOTER
          ============================================================ -->
     <footer class="hud-footer"
             style="padding: 16px 24px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
@@ -396,7 +498,7 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-            <a href="https://github.com/Joker15-tech/NEXUS-ZIP-IMG-TO-PDFf" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank" rel="noopener noreferrer"
                class="icon-btn" title="GitHub" aria-label="GitHub" style="width: 26px; height: 26px;">
                 <svg style="width: 13px; height: 13px;"><use href="#i-github"/></svg>
             </a>
@@ -504,20 +606,12 @@
 </div>
 
 <!-- ====================================================================
-     BOOTSTRAP HYBRIDE — local d'abord, CDN en fallback
-     --------------------------------------------------------------------
-     • Local : web/vendor/*.js   (offline, instantané)
-     • CDN   : cdnjs.cloudflare.com (fallback si vendor/ absent)
-     Ordre garanti : JSZip → jsPDF → constants → sorting → app
+     BOOTSTRAP UNIVERSEL — local vendor/ → CDN fallback + multi-path shared
      ==================================================================== -->
 <script>
 (function () {
     'use strict';
 
-    /* ------------------------------------------------------------------
-       Bibliothèques externes : { name, local, cdn, check }
-       `check` vérifie que le symbole global est bien défini après load.
-       ------------------------------------------------------------------ */
     var EXTERNAL_LIBS = [
         {
             name:  'JSZip',
@@ -534,14 +628,18 @@
         }
     ];
 
-    /* ------------------------------------------------------------------
-       Charge un script et résout quand il est prêt.
-       ------------------------------------------------------------------ */
+    var SHARED_BASES = [
+        './shared/',
+        '../shared/',
+        '/shared/',
+        'shared/'
+    ];
+
     function loadScript(src, attrs) {
         return new Promise(function (resolve, reject) {
             var s = document.createElement('script');
             s.src = src;
-            s.async = false;   // préserve l'ordre entre scripts
+            s.async = false;
             s.defer = false;
             if (attrs) {
                 Object.keys(attrs).forEach(function (k) {
@@ -554,9 +652,6 @@
         });
     }
 
-    /* ------------------------------------------------------------------
-       Charge une lib : local d'abord, puis CDN si échec.
-       ------------------------------------------------------------------ */
     function loadExternal(lib) {
         return loadScript(lib.local)
             .then(function () {
@@ -577,23 +672,29 @@
             });
     }
 
-    /* ------------------------------------------------------------------
-       Orchestration séquentielle :
-       1. JSZip + jsPDF (parallèle, indépendants)
-       2. constants.js
-       3. sorting-logic.js
-       4. app.js
-       ------------------------------------------------------------------ */
+    function loadShared(filename) {
+        var i = 0;
+
+        function tryNext() {
+            if (i >= SHARED_BASES.length) {
+                return Promise.reject(
+                    new Error('Cannot load shared/' + filename +
+                              ' (tried ' + SHARED_BASES.length + ' paths)')
+                );
+            }
+            var url = SHARED_BASES[i++] + filename;
+            return loadScript(url).catch(tryNext);
+        }
+
+        return tryNext().then(function (loadedUrl) {
+            console.info('[NEXUS] shared/' + filename + ' ← ' + loadedUrl);
+        });
+    }
+
     Promise.all(EXTERNAL_LIBS.map(loadExternal))
-        .then(function () {
-            return loadScript('../shared/constants.js');
-        })
-        .then(function () {
-            return loadScript('../shared/sorting-logic.js');
-        })
-        .then(function () {
-            return loadScript('app.js');
-        })
+        .then(function () { return loadShared('constants.js'); })
+        .then(function () { return loadShared('sorting-logic.js'); })
+        .then(function () { return loadScript('app.js'); })
         .then(function () {
             console.info('[NEXUS] All dependencies loaded ✓');
         })
@@ -607,7 +708,7 @@
                 'top:20px',
                 'left:50%',
                 'transform:translateX(-50%)',
-                'max-width:520px',
+                'max-width:560px',
                 'padding:16px 20px',
                 'background:#ff4d6d',
                 'color:#fff',
@@ -620,8 +721,6 @@
             ].join(';');
             banner.innerHTML =
                 '<strong>⚠ Impossible de charger les dépendances</strong><br>' +
-                'Ni le dossier <code>vendor/</code> local, ni le CDN ' +
-                'ne sont accessibles.<br><br>' +
                 '<small>' + String(err.message || err) + '</small>';
             document.body.appendChild(banner);
         });
@@ -629,7 +728,7 @@
 </script>
 
 <!-- ====================================================================
-     INLINE UI GLUE — cosmétique + helpers
+     UI GLUE
      ==================================================================== -->
 <script>
 (function () {
@@ -643,7 +742,8 @@
             const d = new Date();
             clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         };
-        tick(); setInterval(tick, 1000);
+        tick();
+        setInterval(tick, 1000);
     }
 
     /* Footer uptime */
@@ -656,10 +756,11 @@
             const m = Math.floor(s / 60);
             uptimeEl.textContent = `${pad(m)}:${pad(s % 60)}`;
         };
-        tick(); setInterval(tick, 1000);
+        tick();
+        setInterval(tick, 1000);
     }
 
-    /* Theme toggle + icon swap */
+    /* Theme toggle */
     const THEME_KEY = 'zipToPdfTheme';
     const themeBtn = document.getElementById('themeToggleBtn');
     const sunIcon = themeBtn && themeBtn.querySelector('.icon-sun');
@@ -735,7 +836,9 @@
     function closeConfirm(result) {
         if (confirmModal) confirmModal.classList.remove('active');
         if (confirmResolver) {
-            const r = confirmResolver; confirmResolver = null; r(result);
+            const r = confirmResolver;
+            confirmResolver = null;
+            r(result);
         }
     }
 
@@ -751,19 +854,24 @@
         const typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
 
         if (e.key === 'Escape' && confirmModal && confirmModal.classList.contains('active')) {
-            e.stopPropagation(); closeConfirm(false); return;
+            e.stopPropagation();
+            closeConfirm(false);
+            return;
         }
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
             e.preventDefault();
             const btn = document.getElementById('resetSettingsBtn');
-            if (btn) btn.click(); return;
+            if (btn) btn.click();
+            return;
         }
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
             e.preventDefault();
-            if (themeBtn) themeBtn.click(); return;
+            if (themeBtn) themeBtn.click();
+            return;
         }
         if (e.key === '?' && !typing) {
-            e.preventDefault(); showShortcuts(true);
+            e.preventDefault();
+            showShortcuts(true);
         }
     });
 
@@ -779,7 +887,7 @@
         });
     }
 
-    /* Responsive collapse */
+    /* Responsive bento */
     const mq = window.matchMedia('(max-width: 900px)');
     const grid = document.querySelector('.bento-grid');
     function syncLayout() {
