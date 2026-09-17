@@ -1,1002 +1,582 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nexus" data-app="nexus-quantum">
-
+<html lang="en" data-theme="nexus">
 <head>
-    <!-- ================================================================
-         § 01 — META / ENCODING / VIEWPORT
-         ================================================================ -->
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="color-scheme" content="dark light">
-    <meta name="theme-color"
-          content="#05060b"
-          media="(prefers-color-scheme: dark)">
-    <meta name="theme-color"
-          content="#eef2fb"
-          media="(prefers-color-scheme: light)">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="format-detection" content="email=no">
-    <meta name="format-detection" content="address=no">
-
-    <!-- ================================================================
-         § 02 — SEO
-         ================================================================ -->
-    <title>NEXUS QUANTUM // ZIP ⇄ PDF Converter</title>
-
-    <meta name="description"
-          content="NEXUS QUANTUM — Convert ZIP archives or image sets into a single PDF. 100% client-side, no uploads, no telemetry, no tracking.">
-    <meta name="author" content="NEXUS_QUANTUM">
-    <meta name="contact" content="drxenon487@gmail.com">
-    <meta name="keywords"
-          content="zip to pdf, images to pdf, client-side pdf, jszip, jspdf, nexus quantum, offline pdf converter, batch pdf, image batch">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="rating" content="general">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta name="application-name" content="NEXUS QUANTUM">
-    <meta name="generator" content="NEXUS-QUANTUM-v2.0.0">
-    <meta name="classification" content="Utility">
-    <meta name="category" content="Productivity">
-
-    <!-- ================================================================
-         § 03 — OPEN GRAPH
-         ================================================================ -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="NEXUS QUANTUM // ZIP ⇄ PDF Converter">
-    <meta property="og:description"
-          content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
-    <meta property="og:site_name" content="NEXUS QUANTUM">
-    <meta property="og:locale" content="en_US">
-    <meta property="og:determiner" content="the">
-
-    <!-- ================================================================
-         § 04 — TWITTER / X
-         ================================================================ -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="NEXUS QUANTUM // ZIP ⇄ PDF Converter">
-    <meta name="twitter:description"
-          content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
-    <meta name="twitter:creator" content="@NEXUS_QUANTUM">
-    <meta name="twitter:site" content="@NEXUS_QUANTUM">
-
-    <!-- ================================================================
-         § 05 — FAVICON (inline SVG)
-         ================================================================ -->
-    <link rel="icon"
-          type="image/svg+xml"
-          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2305060b'/><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/><circle cx='16' cy='18' r='2' fill='%23ff3cac'/></svg>">
-
-    <link rel="apple-touch-icon"
-          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2305060b'/><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/></svg>">
-
-    <link rel="mask-icon"
-          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/></svg>"
-          color="#00f0ff">
-
-    <!-- ================================================================
-         § 06 — RESOURCE HINTS
-         ================================================================ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-
-    <!-- ================================================================
-         § 07 — FONTS
-         ================================================================ -->
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@300;400;600&family=Rajdhani:wght@300;400;500;600;700&display=swap">
-
-    <!-- ================================================================
-         § 08 — LOCAL STYLES
-         ================================================================ -->
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#05060b">
+<title>NEXUS QUANTUM · ZIP → PDF</title>
+<meta name="description" content="Convert ZIP archives or image sets into a single PDF — entirely in your browser.">
+<meta name="author" content="NEXUS_QUANTUM">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NEXUS QUANTUM · ZIP → PDF">
+<meta property="og:description" content="Convert archives into a single PDF, entirely in your browser.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@NEXUS_QUANTUM">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2305060b'/><path d='M7 21 L16 9 L25 21' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=JetBrains+Mono:wght@400;600&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body data-app-version="2.0.0-nexus"
-      data-app-codename="QUANTUM"
-      data-app-author="NEXUS_QUANTUM">
+<body data-app-version="2.0.0-nexus">
 
 <!-- ====================================================================
-     § 09 — SVG ICON SPRITE
-     Référencé partout via <use href="#i-xxx">
+     SVG SPRITE — icônes compactes
      ==================================================================== -->
-<svg xmlns="http://www.w3.org/2000/svg"
-     style="display:none"
-     aria-hidden="true"
-     focusable="false">
-
-    <!-- ---------------------------------------------------------------
-         Upload arrow
-         --------------------------------------------------------------- -->
-    <symbol id="i-upload"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Check
-         --------------------------------------------------------------- -->
-    <symbol id="i-check"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M5 13l4 4L19 7"/>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Error (X)
-         --------------------------------------------------------------- -->
-    <symbol id="i-error"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M6 18L18 6M6 6l12 12"/>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Warning (triangle)
-         --------------------------------------------------------------- -->
-    <symbol id="i-warning"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
+    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
+    </symbol>
+    <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Info (circle i)
-         --------------------------------------------------------------- -->
-    <symbol id="i-info"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </symbol>
-
-    <!-- ---------------------------------------------------------------
-         GitHub
-         --------------------------------------------------------------- -->
     <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.1c-3.2.7-3.87-1.37-3.87-1.37-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.26 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         X / Twitter
-         --------------------------------------------------------------- -->
-    <symbol id="i-x-twitter" viewBox="0 0 24 24" fill="currentColor">
+    <symbol id="i-x" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Instagram
-         --------------------------------------------------------------- -->
     <symbol id="i-instagram" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Mail
-         --------------------------------------------------------------- -->
-    <symbol id="i-mail"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
+    <symbol id="i-discord" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Sun (light theme indicator)
-         --------------------------------------------------------------- -->
-    <symbol id="i-sun"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <circle cx="12" cy="12" r="4"/>
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    <symbol id="i-youtube" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Moon (dark theme indicator)
-         --------------------------------------------------------------- -->
-    <symbol id="i-moon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    <symbol id="i-telegram" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Keyboard
-         --------------------------------------------------------------- -->
-    <symbol id="i-keyboard"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <rect x="2" y="6" width="20" height="12" rx="2"/>
-        <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
+    <symbol id="i-linkedin" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Zap (convert action)
-         --------------------------------------------------------------- -->
-    <symbol id="i-zap"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    <symbol id="i-tiktok" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
     </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Merge / Layers
-         --------------------------------------------------------------- -->
-    <symbol id="i-merge"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-        <polyline points="2 17 12 22 22 17"/>
-        <polyline points="2 12 12 17 22 12"/>
-    </symbol>
-
-    <!-- ---------------------------------------------------------------
-         Trash (remove)
-         --------------------------------------------------------------- -->
-    <symbol id="i-trash"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
     </symbol>
 </svg>
 
-<!-- ====================================================================
-     § 10 — AMBIENT BACKGROUND LAYERS
-     ==================================================================== -->
 <div class="bg-grid" aria-hidden="true"></div>
 
-<div class="bg-orbs" aria-hidden="true">
-    <span class="orb orb-cyan"></span>
-    <span class="orb orb-violet"></span>
-    <span class="orb orb-magenta"></span>
-</div>
+<div class="container" style="max-width: 1200px;">
 
-<div class="scanlines" aria-hidden="true"></div>
-<div class="vignette" aria-hidden="true"></div>
+    <!-- ============================================================
+         TOPBAR — brand left · socials right (compact)
+         ============================================================ -->
+    <div class="hud-header"
+         style="padding: 14px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
 
-<!-- ====================================================================
-     § 11 — NOSCRIPT FALLBACK
-     ==================================================================== -->
-<noscript>
-    <div class="noscript-warning" role="alert">
-        <strong>⚠ JavaScript is required.</strong>
-        NEXUS QUANTUM runs entirely in your browser — enable JavaScript to use it.
+        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+            <span class="brand" style="font-size: 0.9rem; letter-spacing: 0.1em;">
+                NEXUS<span class="brand-dot">_</span>QUANTUM
+            </span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); letter-spacing: 0.1em;"
+                  id="hud-version">v2.0.0</span>
+            <span style="width: 1px; height: 14px; background: var(--border);" aria-hidden="true"></span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em;"
+                  id="hud-clock">--:--:--</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <!-- Social icons -->
+            <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="GitHub" aria-label="GitHub" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-github"/></svg>
+            </a>
+            <a href="https://x.com/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="@NEXUS_QUANTUM" aria-label="X" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-x"/></svg>
+            </a>
+            <a href="https://instagram.com/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Instagram" aria-label="Instagram" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-instagram"/></svg>
+            </a>
+            <a href="https://discord.gg/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Discord" aria-label="Discord" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-discord"/></svg>
+            </a>
+            <a href="https://youtube.com/@NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="YouTube" aria-label="YouTube" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-youtube"/></svg>
+            </a>
+            <a href="https://t.me/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Telegram" aria-label="Telegram" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-telegram"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="LinkedIn" aria-label="LinkedIn" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-linkedin"/></svg>
+            </a>
+            <a href="https://tiktok.com/@NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="TikTok" aria-label="TikTok" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-tiktok"/></svg>
+            </a>
+            <a href="mailto:drxenon487@gmail.com"
+               class="icon-btn" title="Email" aria-label="Email" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-mail"/></svg>
+            </a>
+
+            <span style="width: 1px; height: 14px; background: var(--border); margin: 0 4px;" aria-hidden="true"></span>
+
+            <!-- Action buttons -->
+            <button type="button" class="icon-btn" id="themeToggleBtn" title="Toggle theme (Ctrl+T)"
+                    aria-label="Toggle theme" style="width: 28px; height: 28px;">
+                <svg class="icon-sun" style="width: 14px; height: 14px; display:none;"><use href="#i-sun"/></svg>
+                <svg class="icon-moon" style="width: 14px; height: 14px;"><use href="#i-moon"/></svg>
+            </button>
+            <button type="button" class="icon-btn" id="shortcutsToggleBtn" title="Shortcuts (?)"
+                    aria-label="Keyboard shortcuts" style="width: 28px; height: 28px;">
+                <svg style="width: 14px; height: 14px;"><use href="#i-keyboard"/></svg>
+            </button>
+        </div>
     </div>
-</noscript>
 
-<!-- ====================================================================
-     § 12 — MAIN CONTAINER
-     ==================================================================== -->
-<div class="container">
-
-    <!-- ================================================================
-         § 13 — HEADER (HUD)
-         ================================================================ -->
-    <header class="hud-header" role="banner">
-        <div class="hud-corner tl" aria-hidden="true"></div>
-        <div class="hud-corner tr" aria-hidden="true"></div>
-        <div class="hud-corner bl" aria-hidden="true"></div>
-        <div class="hud-corner br" aria-hidden="true"></div>
-
-        <!-- Status row -->
-        <div class="status-row" role="status" aria-live="polite">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span class="status-text">SYSTEM ONLINE</span>
-            <span class="status-sep" aria-hidden="true">//</span>
-            <span class="status-text dim">NODE: LOCAL</span>
-            <span class="status-sep" aria-hidden="true">//</span>
-            <span class="status-text dim" id="hud-clock">--:--:--</span>
-            <span class="status-sep" aria-hidden="true">//</span>
-            <span class="status-text dim" id="hud-version">v2.0.0-nexus</span>
+    <!-- ============================================================
+         HERO — inline, compact
+         ============================================================ -->
+    <header style="padding: 0 4px 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div>
+            <h1 class="glitch" style="font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 6px;">
+                ZIP <span class="arrow">→</span> PDF
+            </h1>
+            <p class="subtitle" style="font-size: 12px;">
+                Convert archives or image batches into a single PDF · <em>100% offline</em>
+            </p>
         </div>
 
-        <!-- Title -->
-        <h1 class="glitch" data-text="ZIPPED IMAGES → PDF">
-            ZIPPED IMAGES <span class="arrow" aria-hidden="true">→</span> PDF
-        </h1>
-
-        <!-- Subtitle -->
-        <p class="subtitle">
-            <span class="bracket" aria-hidden="true">[</span>
-            Convert ZIP archives or image sets into a single PDF —
-            <em>100% client-side</em>
-            <span class="bracket" aria-hidden="true">]</span>
-        </p>
-
-        <!-- Quick actions -->
-        <div class="header-actions" role="toolbar" aria-label="Quick actions">
-            <button type="button"
-                    class="icon-btn"
-                    id="themeToggleBtn"
-                    title="Toggle theme (Ctrl+T)"
-                    aria-label="Toggle color theme">
-                <svg class="icon icon-sun" aria-hidden="true">
-                    <use href="#i-sun"/>
-                </svg>
-                <svg class="icon icon-moon" aria-hidden="true">
-                    <use href="#i-moon"/>
-                </svg>
-            </button>
-
-            <button type="button"
-                    class="icon-btn"
-                    id="shortcutsToggleBtn"
-                    title="Keyboard shortcuts (?)"
-                    aria-label="Show keyboard shortcuts">
-                <svg class="icon" aria-hidden="true">
-                    <use href="#i-keyboard"/>
-                </svg>
-            </button>
-        </div>
+        <div id="nexus-stats" class="stats-hud"
+             style="display: flex; gap: 18px; padding: 10px 16px; margin: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(10px); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;"
+             role="status" aria-live="polite"></div>
     </header>
 
-    <!-- ================================================================
-         § 14 — MAIN
-         ================================================================ -->
     <main role="main">
 
         <!-- ============================================================
-             § 15 — LIVE STATS HUD (injected by app.js renderStats)
+             BENTO GRID — 2 colonnes
              ============================================================ -->
-        <div id="nexus-stats"
-             class="stats-hud"
-             role="status"
-             aria-live="polite"
-             aria-atomic="true">
-            <!-- Populated by app.js -->
+        <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px;"
+             class="bento-grid">
+
+            <!-- ─── LEFT COLUMN ─── -->
+            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+
+                <!-- UPLOAD -->
+                <section class="panel upload-section" style="margin: 0; padding: 20px 24px;"
+                         aria-labelledby="uploadTitle">
+                    <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
+                        <div class="panel-title">
+                            <h2 id="uploadTitle" style="font-size: 0.85rem; letter-spacing: 0.14em;">INPUT</h2>
+                        </div>
+                        <span class="panel-tag" style="font-size: 10px;">zip · jpg · png · gif · webp</span>
+                    </div>
+
+                    <div class="drop-zone" id="dropZone" role="button" tabindex="0"
+                         aria-label="Drop files here or click to browse"
+                         style="padding: 28px 20px;">
+                        <div class="drop-zone-inner">
+                            <svg class="upload-icon" aria-hidden="true"
+                                 style="width: 32px; height: 32px; margin-bottom: 8px;">
+                                <use href="#i-upload"/>
+                            </svg>
+                            <p class="drop-text" style="font-size: 0.85rem; letter-spacing: 0.1em; margin-bottom: 4px;">
+                                DROP FILES HERE
+                            </p>
+                            <p class="drop-sub" style="font-size: 10px; margin-bottom: 12px;">
+                                or click anywhere in this box
+                            </p>
+
+                            <input type="file" id="fileInput"
+                                   accept=".zip,.jpg,.jpeg,.png,.gif,.webp" multiple hidden>
+
+                            <button type="button" class="btn btn-select"
+                                    style="padding: 8px 18px; font-size: 11px; margin-top: 0;"
+                                    onclick="document.getElementById('fileInput').click()">
+                                <span class="btn-glow" aria-hidden="true"></span>
+                                Choose files
+                            </button>
+
+                            <p class="drop-hint" style="font-size: 9px; margin-top: 10px;">
+                                <kbd>Ctrl</kbd>+<kbd>O</kbd> browse · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> clear
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BULK ACTIONS -->
+                <section class="convert-all-section" id="convertAllSection"
+                         style="display: none; margin: 0; padding: 12px 16px;"
+                         aria-label="Bulk actions">
+                    <div class="button-group" id="convertButtonGroup"></div>
+                </section>
+
+                <!-- FILE QUEUE -->
+                <section class="file-list" id="fileList"
+                         style="margin: 0;" aria-live="polite" aria-label="File queue"></section>
+
+            </div>
+
+            <!-- ─── RIGHT COLUMN ─── -->
+            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+
+                <!-- SETTINGS -->
+                <section class="panel settings-section" style="margin: 0; padding: 20px 24px;"
+                         aria-labelledby="settingsTitle">
+                    <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
+                        <div class="panel-title">
+                            <h2 id="settingsTitle" style="font-size: 0.85rem; letter-spacing: 0.14em;">SETTINGS</h2>
+                        </div>
+                        <button type="button" class="btn btn-reset" id="resetSettingsBtn"
+                                style="padding: 6px 12px; font-size: 10px;" title="Reset (Ctrl+R)">
+                            <span class="btn-glow"></span>
+                            Reset
+                        </button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="setting-item">
+                            <label class="checkbox-label" for="naturalSortEnabled">
+                                <input type="checkbox" id="naturalSortEnabled" checked>
+                                <span class="checkbox-box" aria-hidden="true"></span>
+                                <span class="checkbox-text" style="font-size: 12px;">Natural sort</span>
+                            </label>
+                            <p class="setting-description" style="font-size: 10px; margin-top: 4px;">
+                                <code>page_1 · page_2 · page_10</code>
+                            </p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="priorityChars" class="field-label" style="font-size: 10px;">
+                                PRIORITY CHARS
+                            </label>
+                            <input type="text" id="priorityChars" value="!" placeholder="e.g. !@"
+                                   autocomplete="off" spellcheck="false" autocapitalize="off"
+                                   maxlength="32"
+                                   style="padding: 7px 12px; font-size: 12px;">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RECENT ACTIVITY -->
+                <section class="panel info-section" style="margin: 0; padding: 20px 24px; flex: 1;"
+                         aria-labelledby="historyTitle">
+                    <div class="panel-head" style="margin-bottom: 14px; padding-bottom: 10px;">
+                        <div class="panel-title">
+                            <h2 id="historyTitle" style="font-size: 0.85rem; letter-spacing: 0.14em;">RECENT</h2>
+                        </div>
+                        <button type="button" class="btn btn-reset" id="clearHistoryBtn"
+                                style="padding: 6px 12px; font-size: 10px;" title="Clear history">
+                            <span class="btn-glow"></span>
+                            Clear
+                        </button>
+                    </div>
+
+                    <div id="nexus-history" aria-live="polite"
+                         aria-label="Conversion history"
+                         style="font-size: 11px;"></div>
+                </section>
+
+            </div>
         </div>
 
         <!-- ============================================================
-             § 16 — 01 · CONFIGURATION
+             CAPABILITIES — inline compact strip
              ============================================================ -->
-        <section class="panel settings-section" aria-labelledby="settingsTitle">
-            <div class="panel-head">
+        <section class="panel info-section"
+                 style="margin: 0 0 16px; padding: 16px 24px;"
+                 aria-labelledby="featuresTitle">
+            <div class="panel-head" style="margin-bottom: 12px; padding-bottom: 8px;">
                 <div class="panel-title">
-                    <span class="panel-index" aria-hidden="true">01</span>
-                    <h2 id="settingsTitle">CONFIGURATION</h2>
-                </div>
-
-                <button type="button"
-                        class="btn btn-reset"
-                        id="resetSettingsBtn"
-                        title="Reset settings to defaults (Ctrl+R)">
-                    <span class="btn-glow" aria-hidden="true"></span>
-                    ⟲ RESET DEFAULTS
-                </button>
-            </div>
-
-            <div class="settings-grid">
-                <!-- Natural sort toggle -->
-                <div class="setting-item">
-                    <label class="checkbox-label" for="naturalSortEnabled">
-                        <input type="checkbox"
-                               id="naturalSortEnabled"
-                               checked>
-                        <span class="checkbox-box" aria-hidden="true"></span>
-                        <span class="checkbox-text">Enable Natural Sort</span>
-                    </label>
-
-                    <p class="setting-description">
-                        Sorts numeric tokens in filenames.<br>
-                        <code>page_1 · page_2 · page_10</code>
-                        <span class="vs">vs</span>
-                        <code class="dim">page_1 · page_10 · page_2</code>
-                    </p>
-                </div>
-
-                <!-- Priority characters -->
-                <div class="setting-item">
-                    <label for="priorityChars" class="field-label">
-                        Priority Characters
-                    </label>
-
-                    <input type="text"
-                           id="priorityChars"
-                           value="!"
-                           placeholder="e.g.: !@"
-                           autocomplete="off"
-                           spellcheck="false"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           maxlength="32"
-                           aria-describedby="priorityCharsHelp">
-
-                    <p class="setting-description" id="priorityCharsHelp">
-                        Images starting with these chars are ordered first.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-             § 17 — 02 · INPUT STREAM (upload)
-             ============================================================ -->
-        <section class="panel upload-section" aria-labelledby="uploadTitle">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <span class="panel-index" aria-hidden="true">02</span>
-                    <h2 id="uploadTitle">INPUT STREAM</h2>
-                </div>
-
-                <span class="panel-tag">
-                    ACCEPT: .zip · jpg · jpeg · png · gif · webp
-                </span>
-            </div>
-
-            <!-- Drop zone -->
-            <div class="drop-zone"
-                 id="dropZone"
-                 role="button"
-                 tabindex="0"
-                 aria-label="Drop files here or click to browse">
-
-                <div class="drop-zone-inner">
-                    <svg class="upload-icon" aria-hidden="true">
-                        <use href="#i-upload"/>
-                    </svg>
-
-                    <p class="drop-text">DROP ARCHIVES OR IMAGES HERE</p>
-                    <p class="drop-sub">or click to browse local filesystem</p>
-
-                    <!-- Hidden file input -->
-                    <input type="file"
-                           id="fileInput"
-                           accept=".zip,.jpg,.jpeg,.png,.gif,.webp"
-                           multiple
-                           hidden>
-
-                    <!-- Select button -->
-                    <button type="button"
-                            class="btn btn-select"
-                            onclick="document.getElementById('fileInput').click()">
-                        <span class="btn-glow" aria-hidden="true"></span>
-                        ⬢ SELECT FILES
-                    </button>
-
-                    <!-- Hints -->
-                    <p class="drop-hint">
-                        <kbd>Ctrl</kbd>+<kbd>O</kbd> browse ·
-                        <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> clear
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-             § 18 — BULK CONVERT ACTIONS (injected by app.js)
-             ============================================================ -->
-        <section class="convert-all-section"
-                 id="convertAllSection"
-                 style="display: none;"
-                 aria-label="Bulk conversion actions">
-
-            <div class="button-group" id="convertButtonGroup">
-                <!-- Injected by app.js renderBulkActions() -->
-            </div>
-        </section>
-
-        <!-- ============================================================
-             § 19 — FILE QUEUE (injected by app.js)
-             ============================================================ -->
-        <section class="file-list"
-                 id="fileList"
-                 aria-live="polite"
-                 aria-label="File queue">
-            <!-- Injected by app.js renderFileList() -->
-        </section>
-
-        <!-- ============================================================
-             § 20 — 03 · CORE CAPABILITIES
-             ============================================================ -->
-        <section class="panel info-section" aria-labelledby="featuresTitle">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <span class="panel-index" aria-hidden="true">03</span>
-                    <h2 id="featuresTitle">CORE CAPABILITIES</h2>
+                    <h2 id="featuresTitle" style="font-size: 0.85rem; letter-spacing: 0.14em;">CAPABILITIES</h2>
                 </div>
             </div>
 
-            <ul class="feature-grid">
-                <li>
-                    <span class="feat-id">F-01</span>
-                    Convert ZIP archives containing images into a single PDF
+            <ul class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px;">
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">01</span>
+                    ZIP archives or image batches → single PDF
                 </li>
-
-                <li>
-                    <span class="feat-id">F-02</span>
-                    Batch multiple image files into a single PDF
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">02</span>
+                    Natural sort · priority routing
                 </li>
-
-                <li>
-                    <span class="feat-id">F-03</span>
-                    Configurable natural sort
-                    <code>page_1 · page_2 · page_10</code>
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">03</span>
+                    JPG · PNG · GIF · WebP
                 </li>
-
-                <li>
-                    <span class="feat-id">F-04</span>
-                    Priority character routing (default <code>!</code>)
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">04</span>
+                    ZIP bomb + path traversal guards
                 </li>
-
-                <li>
-                    <span class="feat-id">F-05</span>
-                    Supports
-                    <code>JPG</code>
-                    <code>JPEG</code>
-                    <code>PNG</code>
-                    <code>GIF</code>
-                    <code>WebP</code>
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">05</span>
+                    100% offline · zero telemetry
                 </li>
-
-                <li>
-                    <span class="feat-id">F-06</span>
-                    100% client-side — files never leave your device
-                </li>
-
-                <li>
-                    <span class="feat-id">F-07</span>
-                    ZIP bomb protection · path traversal guards
-                </li>
-
-                <li>
-                    <span class="feat-id">F-08</span>
-                    Drag-to-reorder · live thumbnails · ETA progress
-                </li>
-
-                <li>
-                    <span class="feat-id">F-09</span>
-                    Duplicate detection via SHA-256 hashing
-                </li>
-
-                <li>
-                    <span class="feat-id">F-10</span>
-                    Keyboard shortcuts · cancelable conversions
+                <li style="padding: 8px 12px; font-size: 11px;">
+                    <span class="feat-id" style="font-size: 9px;">06</span>
+                    Drag-to-reorder · cancelable
                 </li>
             </ul>
         </section>
 
         <!-- ============================================================
-             § 21 — 04 · RECENT ACTIVITY (history)
-             ============================================================ -->
-        <section class="panel info-section" aria-labelledby="historyTitle">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <span class="panel-index" aria-hidden="true">04</span>
-                    <h2 id="historyTitle">RECENT ACTIVITY</h2>
-                </div>
-
-                <button type="button"
-                        class="btn btn-reset"
-                        id="clearHistoryBtn"
-                        title="Clear conversion log">
-                    <span class="btn-glow" aria-hidden="true"></span>
-                    ⟲ CLEAR LOG
-                </button>
-            </div>
-
-            <div id="nexus-history"
-                 aria-live="polite"
-                 aria-label="Conversion history">
-                <!-- Injected by app.js renderHistory() -->
-            </div>
-        </section>
-
-        <!-- ============================================================
-             § 22 — 05 · KEYBOARD SHORTCUTS (collapsible)
+             SHORTCUTS (collapsible)
              ============================================================ -->
         <section class="panel info-section shortcuts-panel"
-                 id="shortcutsPanel"
-                 hidden
+                 id="shortcutsPanel" hidden
+                 style="margin: 0 0 16px; padding: 16px 24px;"
                  aria-labelledby="shortcutsTitle">
-
-            <div class="panel-head">
+            <div class="panel-head" style="margin-bottom: 12px; padding-bottom: 8px;">
                 <div class="panel-title">
-                    <span class="panel-index" aria-hidden="true">05</span>
-                    <h2 id="shortcutsTitle">KEYBOARD SHORTCUTS</h2>
+                    <h2 id="shortcutsTitle" style="font-size: 0.85rem; letter-spacing: 0.14em;">SHORTCUTS</h2>
                 </div>
-
-                <button type="button"
-                        class="btn btn-reset"
-                        id="shortcutsCloseBtn"
-                        title="Close shortcuts panel">
-                    <span class="btn-glow" aria-hidden="true"></span>
-                    ✕ CLOSE
+                <button type="button" class="btn btn-reset" id="shortcutsCloseBtn"
+                        style="padding: 6px 12px; font-size: 10px;">
+                    <span class="btn-glow"></span>
+                    Close
                 </button>
             </div>
 
-            <div class="shortcut-grid">
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>Ctrl</kbd>+<kbd>O</kbd>
-                    </span>
-                    <span class="shortcut-desc">Open file picker</span>
+            <div class="shortcut-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px;">
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>O</kbd></span>
+                    <span class="shortcut-desc">Open picker</span>
                 </div>
-
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>
-                    </span>
-                    <span class="shortcut-desc">Clear entire queue</span>
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd></span>
+                    <span class="shortcut-desc">Clear queue</span>
                 </div>
-
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>Esc</kbd>
-                    </span>
-                    <span class="shortcut-desc">
-                        Close modals · cancel active conversion
-                    </span>
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>Esc</kbd></span>
+                    <span class="shortcut-desc">Close / cancel</span>
                 </div>
-
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>Ctrl</kbd>+<kbd>R</kbd>
-                    </span>
-                    <span class="shortcut-desc">Reset settings to defaults</span>
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>R</kbd></span>
+                    <span class="shortcut-desc">Reset settings</span>
                 </div>
-
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>Ctrl</kbd>+<kbd>T</kbd>
-                    </span>
-                    <span class="shortcut-desc">Toggle theme (dark / light)</span>
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>T</kbd></span>
+                    <span class="shortcut-desc">Toggle theme</span>
                 </div>
-
-                <div class="shortcut-row">
-                    <span class="shortcut-keys">
-                        <kbd>?</kbd>
-                    </span>
-                    <span class="shortcut-desc">Show this panel</span>
+                <div class="shortcut-row" style="padding: 8px 12px; font-size: 11px;">
+                    <span class="shortcut-keys"><kbd>?</kbd></span>
+                    <span class="shortcut-desc">Show panel</span>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- ================================================================
-         § 23 — FOOTER
-         ================================================================ -->
-    <footer class="hud-footer" role="contentinfo">
-        <div class="footer-left">
-            <span class="brand">
-                NEXUS<span class="brand-dot" aria-hidden="true">_</span>QUANTUM
-            </span>
-            <span class="footer-sep" aria-hidden="true">//</span>
-            <span class="footer-meta">MIT LICENSE</span>
-            <span class="footer-sep" aria-hidden="true">//</span>
-            <span class="footer-meta" id="footer-uptime">SESSION 00:00</span>
+    <!-- ============================================================
+         FOOTER — dense socials
+         ============================================================ -->
+    <footer class="hud-footer"
+            style="padding: 16px 24px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+
+        <div style="display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;">
+            <span class="brand" style="font-size: 0.8rem;">NEXUS<span class="brand-dot">_</span>QUANTUM</span>
+            <span style="color: var(--text-mute);">·</span>
+            <span style="color: var(--text-dim);">MIT</span>
+            <span style="color: var(--text-mute);">·</span>
+            <span style="color: var(--text-dim);" id="footer-uptime">00:00</span>
         </div>
 
-        <div class="footer-socials" role="list">
-            <a href="https://github.com/9bow/zipped-imgs-to-pdf"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="social-link"
-               title="GitHub Repository"
-               aria-label="GitHub Repository"
-               role="listitem">
-                <svg class="social-icon" aria-hidden="true">
-                    <use href="#i-github"/>
-                </svg>
-                <span class="social-label">GITHUB</span>
+        <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+            <a href="https://github.com/9bow/zipped-imgs-to-pdf" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="GitHub" aria-label="GitHub" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-github"/></svg>
             </a>
-
-            <a href="https://x.com/NEXUS_QUANTUM"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="social-link"
-               title="X / Twitter — @NEXUS_QUANTUM"
-               aria-label="X / Twitter — @NEXUS_QUANTUM"
-               role="listitem">
-                <svg class="social-icon" aria-hidden="true">
-                    <use href="#i-x-twitter"/>
-                </svg>
-                <span class="social-label">@NEXUS_QUANTUM</span>
+            <a href="https://x.com/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="X / @NEXUS_QUANTUM" aria-label="X" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-x"/></svg>
             </a>
-
-            <a href="https://instagram.com/NEXUS_QUANTUM"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="social-link"
-               title="Instagram — @NEXUS_QUANTUM"
-               aria-label="Instagram — @NEXUS_QUANTUM"
-               role="listitem">
-                <svg class="social-icon" aria-hidden="true">
-                    <use href="#i-instagram"/>
-                </svg>
-                <span class="social-label">@NEXUS_QUANTUM</span>
+            <a href="https://instagram.com/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Instagram / @NEXUS_QUANTUM" aria-label="Instagram" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-instagram"/></svg>
             </a>
-
+            <a href="https://discord.gg/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Discord" aria-label="Discord" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-discord"/></svg>
+            </a>
+            <a href="https://youtube.com/@NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="YouTube" aria-label="YouTube" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-youtube"/></svg>
+            </a>
+            <a href="https://t.me/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="Telegram" aria-label="Telegram" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-telegram"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="LinkedIn" aria-label="LinkedIn" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-linkedin"/></svg>
+            </a>
+            <a href="https://tiktok.com/@NEXUS_QUANTUM" target="_blank" rel="noopener noreferrer"
+               class="icon-btn" title="TikTok" aria-label="TikTok" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-tiktok"/></svg>
+            </a>
             <a href="mailto:drxenon487@gmail.com"
-               class="social-link"
-               title="Email — drxenon487@gmail.com"
-               aria-label="Send email to drxenon487@gmail.com"
-               role="listitem">
-                <svg class="social-icon" aria-hidden="true">
-                    <use href="#i-mail"/>
-                </svg>
-                <span class="social-label">drxenon487@gmail.com</span>
+               class="icon-btn" title="Email" aria-label="Email" style="width: 26px; height: 26px;">
+                <svg style="width: 13px; height: 13px;"><use href="#i-mail"/></svg>
             </a>
         </div>
     </footer>
-
 </div>
 
 <!-- ====================================================================
-     § 24 — PROGRESS MODAL
+     PROGRESS MODAL
      ==================================================================== -->
-<div class="modal"
-     id="progressModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="progressTitle"
-     aria-describedby="progressInfo">
-
+<div class="modal" id="progressModal" role="dialog" aria-modal="true"
+     aria-labelledby="progressTitle" aria-describedby="progressInfo">
     <div class="modal-content">
         <div class="modal-scan" aria-hidden="true"></div>
-
-        <h2 id="progressTitle">
-            <span class="pulse-dot" aria-hidden="true"></span>
-            CONVERTING
+        <h2 id="progressTitle" style="font-size: 0.95rem;">
+            <span class="pulse-dot" aria-hidden="true"></span> Converting
         </h2>
-
-        <div class="progress-info" id="progressInfo">
-            Preparing…
-        </div>
-
-        <div class="progress-bar"
-             id="progressBarEl"
-             role="progressbar"
-             aria-valuemin="0"
-             aria-valuemax="100"
-             aria-valuenow="0">
+        <div class="progress-info" id="progressInfo">Preparing…</div>
+        <div class="progress-bar" id="progressBarEl" role="progressbar"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="progress-fill" id="progressFill"></div>
         </div>
-
         <div class="progress-text" id="progressText">0%</div>
-
-        <button type="button"
-                class="btn btn-reset"
-                id="progressCancelBtn"
-                title="Cancel conversion (Esc)">
-            <span class="btn-glow" aria-hidden="true"></span>
-            ✕ CANCEL
+        <button type="button" class="btn btn-reset" id="progressCancelBtn"
+                style="padding: 8px 16px; font-size: 11px; margin-top: 14px;">
+            <span class="btn-glow"></span>
+            Cancel
         </button>
     </div>
 </div>
 
 <!-- ====================================================================
-     § 25 — NOTIFICATION MODAL
+     NOTIFICATION MODAL
      ==================================================================== -->
-<div class="modal"
-     id="notificationModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="notificationTitle"
-     aria-describedby="notificationMessage">
-
+<div class="modal" id="notificationModal" role="dialog" aria-modal="true"
+     aria-labelledby="notificationTitle" aria-describedby="notificationMessage">
     <div class="modal-content notification-modal">
         <div class="modal-scan" aria-hidden="true"></div>
-
-        <div class="notification-icon"
-             id="notificationIcon"
-             aria-hidden="true">
-            <!-- Injected by app.js showNotification() -->
-        </div>
-
-        <h2 id="notificationTitle">Notification</h2>
-
-        <div class="notification-message" id="notificationMessage">
-            <!-- Injected -->
-        </div>
-
-        <button type="button"
-                class="btn btn-primary"
-                id="notificationCloseBtn">
-            <span class="btn-glow" aria-hidden="true"></span>
-            ACKNOWLEDGE
+        <div class="notification-icon" id="notificationIcon" aria-hidden="true"></div>
+        <h2 id="notificationTitle" style="font-size: 0.95rem;">Notification</h2>
+        <div class="notification-message" id="notificationMessage"></div>
+        <button type="button" class="btn btn-primary" id="notificationCloseBtn"
+                style="padding: 10px; font-size: 11px;">
+            <span class="btn-glow"></span>
+            OK
         </button>
     </div>
 </div>
 
 <!-- ====================================================================
-     § 26 — CONFIRM MODAL (promise-based via window.nexusConfirm)
+     CONFIRM MODAL
      ==================================================================== -->
-<div class="modal"
-     id="confirmModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="confirmTitle"
-     aria-describedby="confirmMessage">
-
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true"
+     aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
     <div class="modal-content notification-modal">
         <div class="modal-scan" aria-hidden="true"></div>
-
         <div class="notification-icon warning" aria-hidden="true">
-            <svg style="width:56px;height:56px">
-                <use href="#i-warning"/>
-            </svg>
+            <svg style="width: 40px; height: 40px;"><use href="#i-warning"/></svg>
         </div>
-
-        <h2 id="confirmTitle">Confirm Action</h2>
-
-        <div class="notification-message" id="confirmMessage">
-            Are you sure?
-        </div>
-
+        <h2 id="confirmTitle" style="font-size: 0.95rem;">Confirm</h2>
+        <div class="notification-message" id="confirmMessage">Are you sure?</div>
         <div class="confirm-actions">
-            <button type="button"
-                    class="btn btn-reset"
-                    id="confirmCancelBtn">
-                <span class="btn-glow" aria-hidden="true"></span>
-                CANCEL
+            <button type="button" class="btn btn-reset" id="confirmCancelBtn"
+                    style="padding: 8px 14px; font-size: 11px;">
+                <span class="btn-glow"></span> Cancel
             </button>
-
-            <button type="button"
-                    class="btn btn-primary btn-confirm-ok"
-                    id="confirmOkBtn">
-                <span class="btn-glow" aria-hidden="true"></span>
-                CONFIRM
+            <button type="button" class="btn btn-primary" id="confirmOkBtn"
+                    style="padding: 8px 14px; font-size: 11px; width: auto; margin: 0;">
+                <span class="btn-glow"></span> Confirm
             </button>
         </div>
     </div>
 </div>
 
 <!-- ====================================================================
-     § 27 — EXTERNAL LIBRARIES (pinned CDN versions)
+     SCRIPTS
      ==================================================================== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-
-<!-- ====================================================================
-     § 28 — SHARED MODULES
-     IMPORTANT: constants.js MUST load before sorting-logic.js and app.js
-     ==================================================================== -->
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="../shared/constants.js"></script>
 <script src="../shared/sorting-logic.js"></script>
-
-<!-- ====================================================================
-     § 29 — APPLICATION
-     ==================================================================== -->
 <script src="app.js"></script>
 
-<!-- ====================================================================
-     § 30 — INLINE UI GLUE
-     Cosmetic + helpers. Does NOT touch app.js business logic.
-     ==================================================================== -->
 <script>
 (function () {
     'use strict';
 
-    /* ================================================================
-       § 30.1 — HUD CLOCK
-       ================================================================ */
+    /* HUD clock */
     const clockEl = document.getElementById('hud-clock');
-
     if (clockEl) {
         const pad = n => String(n).padStart(2, '0');
-
         const tick = () => {
             const d = new Date();
-            clockEl.textContent =
-                `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         };
-
-        tick();
-        setInterval(tick, 1000);
+        tick(); setInterval(tick, 1000);
     }
 
-    /* ================================================================
-       § 30.2 — SESSION UPTIME (footer)
-       ================================================================ */
+    /* Footer uptime */
     const uptimeEl = document.getElementById('footer-uptime');
-
     if (uptimeEl) {
         const start = Date.now();
         const pad = n => String(n).padStart(2, '0');
-
         const tick = () => {
             const s = Math.floor((Date.now() - start) / 1000);
             const m = Math.floor(s / 60);
-            uptimeEl.textContent = `SESSION ${pad(m)}:${pad(s % 60)}`;
+            uptimeEl.textContent = `${pad(m)}:${pad(s % 60)}`;
         };
-
-        tick();
-        setInterval(tick, 1000);
+        tick(); setInterval(tick, 1000);
     }
 
-    /* ================================================================
-       § 30.3 — THEME TOGGLE (dark / light), persisted
-       ================================================================ */
+    /* Theme toggle + icon swap */
     const THEME_KEY = 'zipToPdfTheme';
     const themeBtn = document.getElementById('themeToggleBtn');
+    const sunIcon = themeBtn && themeBtn.querySelector('.icon-sun');
+    const moonIcon = themeBtn && themeBtn.querySelector('.icon-moon');
 
-    function applyTheme(theme) {
-        document.documentElement.dataset.theme = theme || 'nexus';
-        try {
-            localStorage.setItem(THEME_KEY, theme || 'nexus');
-        } catch (_) {
-            /* storage disabled — ignore */
+    function syncThemeIcons() {
+        const t = document.documentElement.dataset.theme || 'nexus';
+        if (sunIcon && moonIcon) {
+            sunIcon.style.display = t === 'light' ? 'none' : 'block';
+            moonIcon.style.display = t === 'light' ? 'block' : 'none';
         }
     }
 
-    function currentTheme() {
-        return document.documentElement.dataset.theme || 'nexus';
+    function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme || 'nexus';
+        try { localStorage.setItem(THEME_KEY, theme || 'nexus'); } catch (_) {}
+        syncThemeIcons();
     }
 
     try {
         const saved = localStorage.getItem(THEME_KEY);
-        if (saved) applyTheme(saved);
-    } catch (_) {
-        /* ignore */
-    }
+        if (saved) applyTheme(saved); else syncThemeIcons();
+    } catch (_) { syncThemeIcons(); }
 
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
-            applyTheme(currentTheme() === 'light' ? 'nexus' : 'light');
+            const cur = document.documentElement.dataset.theme || 'nexus';
+            applyTheme(cur === 'light' ? 'nexus' : 'light');
         });
     }
 
-    /* ================================================================
-       § 30.4 — SHORTCUTS PANEL
-       ================================================================ */
+    /* Shortcuts panel */
     const shortcutsPanel = document.getElementById('shortcutsPanel');
     const shortcutsToggleBtn = document.getElementById('shortcutsToggleBtn');
     const shortcutsCloseBtn = document.getElementById('shortcutsCloseBtn');
@@ -1004,61 +584,33 @@
     function showShortcuts(show) {
         if (!shortcutsPanel) return;
         shortcutsPanel.hidden = !show;
-        if (show) {
-            shortcutsPanel.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
+        if (show) shortcutsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+    if (shortcutsToggleBtn) shortcutsToggleBtn.addEventListener('click', () => {
+        showShortcuts(shortcutsPanel ? shortcutsPanel.hidden : true);
+    });
+    if (shortcutsCloseBtn) shortcutsCloseBtn.addEventListener('click', () => showShortcuts(false));
 
-    if (shortcutsToggleBtn) {
-        shortcutsToggleBtn.addEventListener('click', () => {
-            const isHidden = shortcutsPanel ? shortcutsPanel.hidden : true;
-            showShortcuts(isHidden);
-        });
-    }
-
-    if (shortcutsCloseBtn) {
-        shortcutsCloseBtn.addEventListener('click', () => {
-            showShortcuts(false);
-        });
-    }
-
-    /* ================================================================
-       § 30.5 — PROGRESS BAR ARIA SYNC (MutationObserver)
-       ================================================================ */
+    /* Progress aria sync */
     const progressFill = document.getElementById('progressFill');
     const progressBarEl = document.getElementById('progressBarEl');
-
     if (progressFill && progressBarEl && window.MutationObserver) {
-        const sync = () => {
+        new MutationObserver(() => {
             const v = parseInt(progressFill.style.width, 10) || 0;
             progressBarEl.setAttribute('aria-valuenow', String(v));
-        };
-
-        new MutationObserver(sync).observe(progressFill, {
-            attributes: true,
-            attributeFilter: ['style']
-        });
+        }).observe(progressFill, { attributes: true, attributeFilter: ['style'] });
     }
 
-    /* ================================================================
-       § 30.6 — CONFIRM MODAL (promise-based helper)
-       Exposed as window.nexusConfirm(message) -> Promise<boolean>
-       ================================================================ */
+    /* Confirm modal */
     const confirmModal = document.getElementById('confirmModal');
     const confirmMsg = document.getElementById('confirmMessage');
     const confirmOk = document.getElementById('confirmOkBtn');
     const confirmCancel = document.getElementById('confirmCancelBtn');
-
     let confirmResolver = null;
 
     window.nexusConfirm = function (message) {
         return new Promise(resolve => {
-            if (!confirmModal) {
-                return resolve(window.confirm(message));
-            }
+            if (!confirmModal) return resolve(window.confirm(message));
             confirmMsg.textContent = message;
             confirmModal.classList.add('active');
             confirmResolver = resolve;
@@ -1066,78 +618,42 @@
     };
 
     function closeConfirm(result) {
-        if (confirmModal) {
-            confirmModal.classList.remove('active');
-        }
+        if (confirmModal) confirmModal.classList.remove('active');
         if (confirmResolver) {
-            const r = confirmResolver;
-            confirmResolver = null;
-            r(result);
+            const r = confirmResolver; confirmResolver = null; r(result);
         }
     }
 
-    if (confirmOk) {
-        confirmOk.addEventListener('click', () => closeConfirm(true));
-    }
+    if (confirmOk) confirmOk.addEventListener('click', () => closeConfirm(true));
+    if (confirmCancel) confirmCancel.addEventListener('click', () => closeConfirm(false));
+    if (confirmModal) confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) closeConfirm(false);
+    });
 
-    if (confirmCancel) {
-        confirmCancel.addEventListener('click', () => closeConfirm(false));
-    }
-
-    if (confirmModal) {
-        confirmModal.addEventListener('click', (e) => {
-            if (e.target === confirmModal) closeConfirm(false);
-        });
-    }
-
-    /* ================================================================
-       § 30.7 — EXTRA KEYBOARD SHORTCUTS
-       ================================================================ */
+    /* Keyboard shortcuts */
     document.addEventListener('keydown', (e) => {
         const tag = (e.target.tagName || '').toLowerCase();
-        const typing =
-            tag === 'input' ||
-            tag === 'textarea' ||
-            e.target.isContentEditable;
+        const typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
 
-        // Esc closes confirm modal first (topmost)
-        if (
-            e.key === 'Escape' &&
-            confirmModal &&
-            confirmModal.classList.contains('active')
-        ) {
-            e.stopPropagation();
-            closeConfirm(false);
-            return;
+        if (e.key === 'Escape' && confirmModal && confirmModal.classList.contains('active')) {
+            e.stopPropagation(); closeConfirm(false); return;
         }
-
-        // Ctrl+R → reset settings (prevent browser reload)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
             e.preventDefault();
             const btn = document.getElementById('resetSettingsBtn');
-            if (btn) btn.click();
-            return;
+            if (btn) btn.click(); return;
         }
-
-        // Ctrl+T → toggle theme (prevent new tab)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
             e.preventDefault();
-            if (themeBtn) themeBtn.click();
-            return;
+            if (themeBtn) themeBtn.click(); return;
         }
-
-        // "?" → show shortcuts (only when not typing)
         if (e.key === '?' && !typing) {
-            e.preventDefault();
-            showShortcuts(true);
+            e.preventDefault(); showShortcuts(true);
         }
     });
 
-    /* ================================================================
-       § 30.8 — DROP ZONE KEYBOARD ACCESSIBILITY
-       ================================================================ */
+    /* Drop zone keyboard */
     const dropZone = document.getElementById('dropZone');
-
     if (dropZone) {
         dropZone.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -1148,54 +664,25 @@
         });
     }
 
-    /* ================================================================
-       § 30.9 — GLOBAL ERROR HANDLERS (best-effort UX)
-       ================================================================ */
-    window.addEventListener('error', (e) => {
-        if (e && e.error instanceof Error) {
-            console.error('[NEXUS] Uncaught error:', e.error);
-        }
-    });
+    /* Responsive collapse */
+    const mq = window.matchMedia('(max-width: 900px)');
+    const grid = document.querySelector('.bento-grid');
+    function syncLayout() {
+        if (!grid) return;
+        grid.style.gridTemplateColumns = mq.matches ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)';
+    }
+    syncLayout();
+    if (mq.addEventListener) mq.addEventListener('change', syncLayout);
+    else mq.addListener(syncLayout);
 
-    window.addEventListener('unhandledrejection', (e) => {
-        console.error('[NEXUS] Unhandled rejection:', e.reason);
-    });
-
-    /* ================================================================
-       § 30.10 — BOOT LOG (console banner)
-       ================================================================ */
+    /* Boot log */
     console.info(
         '%c NEXUS QUANTUM %c v2.0.0 ',
-        'background:#00f0ff;color:#000;font-weight:bold;padding:2px 6px;border-radius:2px 0 0 2px;',
-        'background:#8a5cff;color:#fff;font-weight:bold;padding:2px 6px;border-radius:0 2px 2px 0;'
+        'background:#00f0ff;color:#000;font-weight:bold;padding:2px 6px;border-radius:3px 0 0 3px;',
+        'background:#8a5cff;color:#fff;font-weight:bold;padding:2px 6px;border-radius:0 3px 3px 0;'
     );
-
-    /* ================================================================
-       § 30.11 — STARTUP READINESS CHECK
-       ================================================================ */
-    const missing = [];
-
-    if (typeof window.JSZip === 'undefined') missing.push('JSZip');
-    if (typeof window.jspdf === 'undefined') missing.push('jsPDF');
-    if (typeof window.NexusConstants === 'undefined') missing.push('NexusConstants');
-    if (typeof window.NexusSorting === 'undefined') missing.push('NexusSorting');
-    if (typeof window.__nexus === 'undefined') missing.push('__nexus');
-
-    if (missing.length > 0) {
-        console.warn(
-            '[NEXUS] Missing dependencies:',
-            missing.join(', '),
-            '— check script loading order.'
-        );
-    } else {
-        console.info(
-            '%c[NEXUS] All systems nominal — v2.0.0-nexus ready.',
-            'color:#b6ff3c;font-weight:bold;'
-        );
-    }
 })();
 </script>
 
 </body>
-
 </html>
