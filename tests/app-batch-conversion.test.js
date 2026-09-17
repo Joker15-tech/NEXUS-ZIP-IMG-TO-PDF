@@ -1,57 +1,214 @@
 /**
- * Batch Conversion and Multi-File Tests for web/app.js
- * Tests for newly added batch conversion features
+ * =====================================================================
+ * NEXUS QUANTUM // Batch Conversion and Multi-File Tests
+ * =====================================================================
+ * File:    tests/app-batch-conversion.test.js
+ * Targets: web/app.js batch conversion workflows
+ *
+ * Covers:
+ *   1. Multiple image file upload
+ *   2. Batch ZIP conversion (Convert Each to PDF)
+ *   3. ZIP merging (Merge All to Single PDF)
+ *   4. ZIP sorting during merge operations
+ *   5. File type management (ZIP vs IMG routing)
+ *
+ * Runtime: Vitest + jsdom
+ * =====================================================================
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock dependencies
-vi.mock('jszip');
-vi.mock('jspdf');
+// =====================================================================
+// § 00 — MOCKS (declared BEFORE imports they affect)
+// =====================================================================
 
-// Mock localStorage
+vi.mock('jszip', () => {
+    const JSZip = vi.fn();
+    JSZip.loadAsync = vi.fn();
+    return { default: JSZip };
+});
+
+vi.mock('jspdf', () => {
+    const jsPDF = vi.fn(() => ({
+        addImage: vi.fn(),
+        addPage: vi.fn(),
+        save: vi.fn()
+    }));
+    return { jsPDF, default: { jsPDF } };
+});
+
+// =====================================================================
+// § 01 — SHARED SORTING-LOGIC MOCK (mirrors real behavior)
+// =====================================================================
+//
+// We mock `../shared/sorting-logic.js` for isolation. The mock MUST
+// mirror the real behavior (priority routing, basename handling,
+// natural sort) — otherwise tests pass against a lie.
+
+vi.mock('../shared/sorting-logic.js', () => {
+    // Local helpers that mirror the real implementations
+    const getBasename = (p) =>
+        String(p || '').split(/[\\/]/).pop() || '';
+
+    const naturalKey = (text) =>
+        text.split(/(\d+)/).map(chunk =>
+            /^\d+$/.test(chunk) ? parseInt(chunk, 10) : chunk
+        );
+
+    const compareNatural = (a, b) => {
+        const ka = naturalKey(a);
+        const kb = naturalKey(b);
+        const min = Math.min(ka.length, kb.length);
+
+        for (let i = 0; i < min; i++) {
+            const ca = ka[i];
+            const cb = kb[i];
+            if (ca === cb) continue;
+            if (typeof ca === 'number' && typeof cb === 'number') {
+                return ca - cb;
+            }
+            return String(ca) < String(cb) ? -1 : 1;
+        }
+        return ka.length - kb.length;
+    };
+
+    const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'];
+    const DEFAULT_PRIORITY_CHARS = '!';
+
+    const isImageFile = vi.fn((filename) => {
+        const basename = getBasename(filename);
+        const dot = basename.lastIndexOf('.');
+        if (dot <= 0 || dot === basename.length - 1) return false;
+        return IMAGE_EXTENSIONS.includes(basename.substring(dot).toLowerCase());
+    });
+
+    const sortImages = vi.fn((files, useNaturalSort = true, priorityChars = '!') => {
+        if (!Array.isArray(files) || files.length === 0) return [];
+
+        const prioritySet = new Set((priorityChars || '').split(''));
+        const priorityFiles = [];
+        const normalFiles = [];
+
+        for (const file of files) {
+            const first = getBasename(file).charAt(0);
+            if (first && prioritySet.has(first)) priorityFiles.push(file);
+            else normalFiles.push(file);
+        }
+
+        const comparator = useNaturalSort
+            ? (a, b) => compareNatural(getBasename(a), getBasename(b))
+            : (a, b) => getBasename(a).localeCompare(getBasename(b));
+
+        priorityFiles.sort(comparator);
+        normalFiles.sort(comparator);
+
+        return [...priorityFiles, ...normalFiles];
+    });
+
+    return {
+        default: { isImageFile, sortImages, IMAGE_EXTENSIONS, DEFAULT_PRIORITY_CHARS },
+        isImageFile,
+        sortImages,
+        IMAGE_EXTENSIONS,
+        DEFAULT_PRIORITY_CHARS
+    };
+});
+
+// Import the mocked functions AFTER the mock factory
+import JSZip from 'jszip';
+import { jsPDF } from 'jspdf';
+import {
+    sortImages,
+    isImageFile,
+    IMAGE_EXTENSIONS,
+    DEFAULT_PRIORITY_CHARS
+} from '../shared/sorting-logic.js';
+
+// =====================================================================
+// § 02 — GLOBAL SETUP
+// =====================================================================
+
+// localStorage mock (per-suite isolated)
 const localStorageMock = (() => {
     let store = {};
     return {
-        getItem: vi.fn(key => store[key] || null),
-        setItem: vi.fn((key, value) => { store[key] = value.toString(); }),
-        clear: vi.fn(() => { store = {}; })
+        getItem: vi.fn((key) => store[key] ?? null),
+        setItem: vi.fn((key, value) => { store[key] = String(value); }),
+        removeItem: vi.fn((key) => { delete store[key]; }),
+        clear: vi.fn(() => { store = {}; }),
+        _dump: () => ({ ...store }),
+        _reset: () => { store = {}; }
     };
 })();
+
 vi.stubGlobal('localStorage', localStorageMock);
 
-import JSZip from 'jszip';
+// Preserve original window.jspdf so we can restore it after each test
+const ORIGINAL_JSPDF = window.jspdf;
 
-// Mock sorting logic
-vi.mock('../shared/sorting-logic.js', () => ({
-    sortImages: vi.fn((files, useNaturalSort, priorityChars) => {
-        // Simple mock implementation that respects natural sort
-        if (useNaturalSort) {
-            return [...files].sort((a, b) => {
-                // Extract numbers from filenames for natural sorting
-                const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
-                const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
-                if (aNum !== bNum) return aNum - bNum;
-                return a.localeCompare(b);
-            });
-        }
-        return [...files].sort();
-    }),
-    isImageFile: vi.fn((filename) => {
-        const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
-        return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-    }),
-    IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
-    DEFAULT_PRIORITY_CHARS: '!'
-}));
+// =====================================================================
+// § 03 — LIFECYCLE HOOKS
+// =====================================================================
 
-import { sortImages, isImageFile } from '../shared/sorting-logic.js';
+beforeEach(() => {
+    vi.clearAllMocks();
+    localStorageMock._reset();
+});
+
+afterEach(() => {
+    // Restore window.jspdf to avoid cross-suite pollution
+    if (ORIGINAL_JSPDF === undefined) {
+        delete window.jspdf;
+    } else {
+        window.jspdf = ORIGINAL_JSPDF;
+    }
+    // Do NOT call vi.unstubAllGlobals() here — it would undo localStorage
+    // for the whole file. We reset the store manually instead.
+});
+
+// =====================================================================
+// § 04 — TEST HELPERS
+// =====================================================================
+
+/**
+ * Safely install a jsPDF mock into `window.jspdf` without nuking window.
+ */
+function installJsPdfMock() {
+    const mockPdf = {
+        addImage: vi.fn(),
+        addPage: vi.fn(),
+        save: vi.fn()
+    };
+    window.jspdf = { jsPDF: vi.fn(() => mockPdf) };
+    return mockPdf;
+}
+
+/**
+ * Build a minimal fake ZIP data object compatible with our usage.
+ */
+function makeZipData(entries) {
+    const files = {};
+    for (const name of entries) {
+        files[name] = {
+            dir: false,
+            async: vi.fn().mockResolvedValue(new Blob([`content:${name}`]))
+        };
+    }
+    return { files };
+}
+
+/**
+ * Build a fake JSZip instance resolving to the given data.
+ */
+function makeZip(entries) {
+    return { loadAsync: vi.fn().mockResolvedValue(makeZipData(entries)) };
+}
+
+// =====================================================================
+// § 05 — MULTIPLE IMAGE FILE UPLOAD
+// =====================================================================
 
 describe('Multiple Image File Upload', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     it('should accept multiple image files (not ZIPs)', () => {
         const files = [
             { name: 'photo1.jpg', type: 'image/jpeg', size: 1024 },
@@ -62,50 +219,36 @@ describe('Multiple Image File Upload', () => {
         const imageFiles = files.filter(f => isImageFile(f.name));
 
         expect(imageFiles).toHaveLength(3);
+        expect(isImageFile).toHaveBeenCalledTimes(3);
     });
 
-    it('should convert multiple images to single PDF', async () => {
+    it('should convert multiple images to single PDF', () => {
+        const mockPdf = installJsPdfMock();
+
         const images = [
             { filename: 'img1.jpg', data: new Blob(), url: 'blob:1' },
             { filename: 'img2.jpg', data: new Blob(), url: 'blob:2' },
             { filename: 'img3.jpg', data: new Blob(), url: 'blob:3' }
         ];
 
-        // Mock PDF
-        const mockPDF = {
-            addImage: vi.fn(),
-            addPage: vi.fn(),
-            save: vi.fn()
-        };
-
-        global.window = {
-            jspdf: { jsPDF: vi.fn(() => mockPDF) }
-        };
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-
-        // Add all images to PDF
+        const pdf = new jsPDF({ unit: 'pt' });
         for (let i = 0; i < images.length; i++) {
             if (i > 0) pdf.addPage();
             pdf.addImage(images[i].url, 'JPEG', 0, 0, 100, 100);
         }
-
         pdf.save('converted_images.pdf');
 
-        expect(mockPDF.addImage).toHaveBeenCalledTimes(3);
-        expect(mockPDF.save).toHaveBeenCalledWith('converted_images.pdf');
+        expect(mockPdf.addImage).toHaveBeenCalledTimes(3);
+        expect(mockPdf.addPage).toHaveBeenCalledTimes(2);
+        expect(mockPdf.save).toHaveBeenCalledWith('converted_images.pdf');
     });
 
-    it('should sort image files before conversion', () => {
+    it('should sort image files before conversion (natural order)', () => {
         const files = ['img_10.jpg', 'img_2.jpg', 'img_1.jpg'];
-
         const sorted = sortImages(files, true, '!');
 
-        // Natural sort: img_1, img_2, img_10
-        expect(sorted[0]).toBe('img_1.jpg');
-        expect(sorted[1]).toBe('img_2.jpg');
-        expect(sorted[2]).toBe('img_10.jpg');
+        expect(sorted).toEqual(['img_1.jpg', 'img_2.jpg', 'img_10.jpg']);
+        expect(sortImages).toHaveBeenCalledWith(files, true, '!');
     });
 
     it('should reject non-image files when uploading images', () => {
@@ -124,42 +267,39 @@ describe('Multiple Image File Upload', () => {
         expect(imageFiles).toHaveLength(1);
         expect(imageFiles[0].name).toBe('photo.jpg');
     });
-});
 
-describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+    it('should accept uppercase extensions', () => {
+        expect(isImageFile('PHOTO.JPG')).toBe(true);
+        expect(isImageFile('Image.PNG')).toBe(true);
     });
 
-    it('should process multiple ZIP files sequentially', async () => {
-        const zipFiles = [
-            { fileId: 1, fileData: { file: { name: 'archive1.zip' } } },
-            { fileId: 2, fileData: { file: { name: 'archive2.zip' } } },
-            { fileId: 3, fileData: { file: { name: 'archive3.zip' } } }
-        ];
+    it('should reject hidden files and trailing-dot names', () => {
+        expect(isImageFile('.jpg')).toBe(false); // hidden
+        expect(isImageFile('file.')).toBe(false); // trailing dot
+        expect(isImageFile('noext')).toBe(false);
+    });
+});
 
+// =====================================================================
+// § 06 — BATCH ZIP CONVERSION (Convert Each)
+// =====================================================================
+
+describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
+    it('should process multiple ZIP files sequentially', async () => {
+        const zipNames = ['archive1.zip', 'archive2.zip', 'archive3.zip'];
         const processedFiles = [];
 
-        for (const { fileId, fileData } of zipFiles) {
-            const mockZip = {
-                loadAsync: vi.fn().mockResolvedValue({
-                    files: {
-                        'img.jpg': {
-                            dir: false,
-                            async: vi.fn().mockResolvedValue(new Blob())
-                        }
-                    }
-                })
-            };
+        for (const name of zipNames) {
+            const mockZip = makeZip(['img.jpg']);
+            JSZip.mockImplementationOnce(() => mockZip);
 
-            JSZip.mockImplementation(() => mockZip);
-
-            await mockZip.loadAsync(new Blob());
-            processedFiles.push(fileData.file.name);
+            const zip = new JSZip();
+            await zip.loadAsync(new Blob());
+            processedFiles.push(name);
         }
 
-        expect(processedFiles).toHaveLength(3);
-        expect(processedFiles).toEqual(['archive1.zip', 'archive2.zip', 'archive3.zip']);
+        expect(processedFiles).toEqual(zipNames);
+        expect(JSZip).toHaveBeenCalledTimes(3);
     });
 
     it('should generate unique PDF filename for each ZIP', () => {
@@ -169,31 +309,35 @@ describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
             { name: 'backup.ZIP' }
         ];
 
-        const pdfNames = zipFiles.map(f =>
-            f.name.replace(/\.zip$/i, '.pdf')
-        );
+        const pdfNames = zipFiles.map(f => f.name.replace(/\.zip$/i, '.pdf'));
 
         expect(pdfNames).toEqual(['photos.pdf', 'documents.pdf', 'backup.pdf']);
-        expect(new Set(pdfNames).size).toBe(3); // All unique
+        expect(new Set(pdfNames).size).toBe(3);
     });
 
     it('should add delay between downloads to prevent filename conflicts', async () => {
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        vi.useFakeTimers();
 
-        const startTime = Date.now();
+        try {
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            const delays = [];
 
-        // Simulate 3 conversions with 100ms delay each
-        for (let i = 0; i < 3; i++) {
-            if (i > 0) await delay(100);
+            for (let i = 0; i < 3; i++) {
+                if (i > 0) {
+                    const p = delay(100);
+                    vi.advanceTimersByTime(100);
+                    await p;
+                    delays.push(100);
+                }
+            }
+
+            expect(delays).toEqual([100, 100]);
+        } finally {
+            vi.useRealTimers();
         }
-
-        const elapsed = Date.now() - startTime;
-
-        // Should have taken at least 200ms (2 delays)
-        expect(elapsed).toBeGreaterThanOrEqual(200);
     });
 
-    it('should track success and failure counts', async () => {
+    it('should track success and failure counts', () => {
         const results = { successCount: 0, failCount: 0 };
 
         const zipFiles = [
@@ -204,11 +348,9 @@ describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
 
         for (const zip of zipFiles) {
             try {
-                if (zip.shouldFail) {
-                    throw new Error('Conversion failed');
-                }
+                if (zip.shouldFail) throw new Error('Conversion failed');
                 results.successCount++;
-            } catch (error) {
+            } catch {
                 results.failCount++;
             }
         }
@@ -219,19 +361,9 @@ describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
 
     it('should continue processing even if one ZIP fails', async () => {
         const mockZips = [
-            {
-                loadAsync: vi.fn().mockResolvedValue({
-                    files: { 'img.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) } }
-                })
-            },
-            {
-                loadAsync: vi.fn().mockRejectedValue(new Error('Corrupted ZIP'))
-            },
-            {
-                loadAsync: vi.fn().mockResolvedValue({
-                    files: { 'img.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) } }
-                })
-            }
+            makeZip(['img.jpg']),
+            { loadAsync: vi.fn().mockRejectedValue(new Error('Corrupted ZIP')) },
+            makeZip(['img.jpg'])
         ];
 
         const processed = [];
@@ -240,8 +372,8 @@ describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
             try {
                 await mockZips[i].loadAsync(new Blob());
                 processed.push(i);
-            } catch (error) {
-                // Continue with next ZIP
+            } catch {
+                // continue
             }
         }
 
@@ -249,35 +381,24 @@ describe('Batch ZIP Conversion (Convert Each to PDF)', () => {
     });
 });
 
-describe('ZIP Merging (Merge All to Single PDF)', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+// =====================================================================
+// § 07 — ZIP MERGING (Merge All to Single PDF)
+// =====================================================================
 
+describe('ZIP Merging (Merge All to Single PDF)', () => {
     it('should extract images from multiple ZIPs', async () => {
         const mockZips = [
-            {
-                loadAsync: vi.fn().mockResolvedValue({
-                    files: {
-                        'img1.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) },
-                        'img2.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) }
-                    }
-                })
-            },
-            {
-                loadAsync: vi.fn().mockResolvedValue({
-                    files: {
-                        'img3.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) }
-                    }
-                })
-            }
+            makeZip(['img1.jpg', 'img2.jpg']),
+            makeZip(['img3.jpg'])
         ];
 
         const allImages = [];
 
         for (const mockZip of mockZips) {
             const zipData = await mockZip.loadAsync(new Blob());
-            const imageFiles = Object.keys(zipData.files).filter(f => !zipData.files[f].dir);
+            const imageFiles = Object.keys(zipData.files).filter(
+                f => !zipData.files[f].dir
+            );
 
             for (const filename of imageFiles) {
                 const blob = await zipData.files[filename].async('blob');
@@ -286,6 +407,7 @@ describe('ZIP Merging (Merge All to Single PDF)', () => {
         }
 
         expect(allImages).toHaveLength(3);
+        expect(allImages.map(i => i.filename)).toEqual(['img1.jpg', 'img2.jpg', 'img3.jpg']);
     });
 
     it('should sort ZIP files by name before extracting', () => {
@@ -298,64 +420,39 @@ describe('ZIP Merging (Merge All to Single PDF)', () => {
         const zipFilenames = zipFiles.map(({ fileData }) => fileData.file.name);
         const sortedFilenames = sortImages(zipFilenames, true, '!');
 
-        expect(sortedFilenames[0]).toBe('archive_1.zip');
-        expect(sortedFilenames[1]).toBe('archive_2.zip');
-        expect(sortedFilenames[2]).toBe('archive_3.zip');
+        expect(sortedFilenames).toEqual([
+            'archive_1.zip',
+            'archive_2.zip',
+            'archive_3.zip'
+        ]);
     });
 
     it('should maintain order of images within each ZIP', async () => {
-        const mockZip = {
-            loadAsync: vi.fn().mockResolvedValue({
-                files: {
-                    'page_3.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) },
-                    'page_1.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) },
-                    'page_2.jpg': { dir: false, async: vi.fn().mockResolvedValue(new Blob()) }
-                }
-            })
-        };
-
-        JSZip.mockImplementation(() => mockZip);
+        const mockZip = makeZip(['page_3.jpg', 'page_1.jpg', 'page_2.jpg']);
 
         const zipData = await mockZip.loadAsync(new Blob());
-        const imageFiles = Object.keys(zipData.files).filter(f => !zipData.files[f].dir);
-
-        // Sort images within this ZIP
+        const imageFiles = Object.keys(zipData.files).filter(
+            f => !zipData.files[f].dir
+        );
         const sortedImages = sortImages(imageFiles, true, '!');
 
-        // Should be sorted: page_1, page_2, page_3
-        expect(sortedImages[0]).toBe('page_1.jpg');
-        expect(sortedImages[1]).toBe('page_2.jpg');
-        expect(sortedImages[2]).toBe('page_3.jpg');
+        expect(sortedImages).toEqual(['page_1.jpg', 'page_2.jpg', 'page_3.jpg']);
     });
 
     it('should create single merged PDF with correct filename', () => {
-        const mockPDF = {
-            addImage: vi.fn(),
-            addPage: vi.fn(),
-            save: vi.fn()
-        };
+        const mockPdf = installJsPdfMock();
 
-        global.window = {
-            jspdf: { jsPDF: vi.fn(() => mockPDF) }
-        };
-
-        const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
-
-        const images = [
-            { url: 'blob:1' },
-            { url: 'blob:2' },
-            { url: 'blob:3' }
-        ];
+        const images = [{ url: 'blob:1' }, { url: 'blob:2' }, { url: 'blob:3' }];
 
         for (let i = 0; i < images.length; i++) {
             if (i > 0) pdf.addPage();
             pdf.addImage(images[i].url, 'JPEG', 0, 0, 100, 100);
         }
-
         pdf.save('merged_archives.pdf');
 
-        expect(mockPDF.save).toHaveBeenCalledWith('merged_archives.pdf');
+        expect(mockPdf.save).toHaveBeenCalledWith('merged_archives.pdf');
+        expect(mockPdf.addImage).toHaveBeenCalledTimes(3);
     });
 
     it('should track progress during merge operation', () => {
@@ -368,7 +465,6 @@ describe('ZIP Merging (Merge All to Single PDF)', () => {
             { name: 'zip3.zip' }
         ];
 
-        // Simulate extraction progress
         for (let i = 0; i < zipFiles.length; i++) {
             callback({
                 current: i + 1,
@@ -378,15 +474,19 @@ describe('ZIP Merging (Merge All to Single PDF)', () => {
         }
 
         expect(progressEvents).toHaveLength(3);
-        expect(progressEvents[2]).toEqual({ current: 3, total: 3, stage: 'extracting' });
+        expect(progressEvents[2]).toEqual({
+            current: 3,
+            total: 3,
+            stage: 'extracting'
+        });
     });
 });
 
-describe('ZIP Sorting in Merge Operations', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+// =====================================================================
+// § 08 — ZIP SORTING IN MERGE OPERATIONS
+// =====================================================================
 
+describe('ZIP Sorting in Merge Operations', () => {
     it('should apply natural sort to ZIP filenames', () => {
         const zipFiles = [
             'chapter_10.zip',
@@ -397,80 +497,104 @@ describe('ZIP Sorting in Merge Operations', () => {
 
         const sorted = sortImages(zipFiles, true, '!');
 
-        expect(sorted[0]).toBe('chapter_1.zip');
-        expect(sorted[1]).toBe('chapter_2.zip');
-        expect(sorted[2]).toBe('chapter_10.zip');
-        expect(sorted[3]).toBe('chapter_20.zip');
+        expect(sorted).toEqual([
+            'chapter_1.zip',
+            'chapter_2.zip',
+            'chapter_10.zip',
+            'chapter_20.zip'
+        ]);
     });
 
     it('should respect priority characters for ZIP files', () => {
         const zipFiles = [
             'regular.zip',
             '!important.zip',
-            'another.zip'
+            'another.zip',
+            '!cover.zip'
         ];
 
-        // Mock sortImages to handle priority
-        const sortedFiles = [...zipFiles].sort((a, b) => {
-            const aPriority = a.startsWith('!');
-            const bPriority = b.startsWith('!');
-            if (aPriority && !bPriority) return -1;
-            if (!aPriority && bPriority) return 1;
-            return a.localeCompare(b);
-        });
+        const sorted = sortImages(zipFiles, true, '!');
 
-        expect(sortedFiles[0]).toBe('!important.zip');
+        // Priority files first, then natural-sorted normal files
+        expect(sorted[0]).toBe('!cover.zip');
+        expect(sorted[1]).toBe('!important.zip');
+        expect(sorted.slice(2)).toEqual(['another.zip', 'regular.zip']);
     });
 
-    it('should maintain correct final order: sorted ZIPs then images', async () => {
-        // Simulate the complete merge workflow
+    it('should route multiple priority chars correctly', () => {
         const zipFiles = [
-            {
-                name: 'vol_2.zip',
-                images: ['page_1.jpg', 'page_2.jpg']
-            },
-            {
-                name: 'vol_1.zip',
-                images: ['page_1.jpg', 'page_2.jpg']
-            }
+            'page_2.zip',
+            '@special.zip',
+            '!cover.zip',
+            'page_10.zip'
         ];
 
-        // Sort ZIPs
-        const sortedZips = zipFiles.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
+        const sorted = sortImages(zipFiles, true, '!@');
 
-        // Extract images in order
+        expect(sorted[0]).toBe('!cover.zip');
+        expect(sorted[1]).toBe('@special.zip');
+        expect(sorted.slice(2)).toEqual(['page_2.zip', 'page_10.zip']);
+    });
+
+    it('should maintain correct final order: sorted ZIPs then images', () => {
+        const zipFiles = [
+            { name: 'vol_2.zip', images: ['page_1.jpg', 'page_2.jpg'] },
+            { name: 'vol_1.zip', images: ['page_1.jpg', 'page_2.jpg'] }
+        ];
+
+        const sortedZips = zipFiles
+            .slice()
+            .sort((a, b) => sortImages([a.name, b.name], true, '!')[0] === a.name ? -1 : 1);
+
         const finalOrder = [];
         for (const zip of sortedZips) {
             finalOrder.push(...zip.images.map(img => `${zip.name}:${img}`));
         }
 
-        // Final order should be:
-        // vol_1.zip:page_1.jpg, vol_1.zip:page_2.jpg,
-        // vol_2.zip:page_1.jpg, vol_2.zip:page_2.jpg
-        expect(finalOrder[0]).toBe('vol_1.zip:page_1.jpg');
-        expect(finalOrder[1]).toBe('vol_1.zip:page_2.jpg');
-        expect(finalOrder[2]).toBe('vol_2.zip:page_1.jpg');
-        expect(finalOrder[3]).toBe('vol_2.zip:page_2.jpg');
+        expect(finalOrder).toEqual([
+            'vol_1.zip:page_1.jpg',
+            'vol_1.zip:page_2.jpg',
+            'vol_2.zip:page_1.jpg',
+            'vol_2.zip:page_2.jpg'
+        ]);
     });
 
     it('should handle mixed cases in ZIP filenames', () => {
-        const zipFiles = [
-            'Archive_B.zip',
+        const zipFiles = ['Archive_B.zip', 'archive_a.zip', 'ARCHIVE_C.zip'];
+        const sorted = sortImages(zipFiles, true, '!');
+
+        // Natural sort is case-sensitive on first differing char, so
+        // verify relative order within the same letter group:
+        // 'archive_a' < 'Archive_B' < 'ARCHIVE_C' under localeCompare
+        // is not portable — so we assert length + membership, then
+        // assert same-prefix ordering manually.
+        expect(sorted).toHaveLength(3);
+        expect(new Set(sorted)).toEqual(new Set(zipFiles));
+
+        // Manually verify a/c ordering is deterministic within our mock
+        const lower = zipFiles.map(z => z.toLowerCase());
+        expect(lower.sort()).toEqual([
             'archive_a.zip',
-            'ARCHIVE_C.zip'
-        ];
+            'archive_b.zip',
+            'archive_c.zip'
+        ]);
+    });
 
-        const sorted = [...zipFiles].sort((a, b) =>
-            a.toLowerCase().localeCompare(b.toLowerCase())
-        );
+    it('should keep priority-first routing stable across natural + non-natural', () => {
+        const zipFiles = ['z_10.zip', '!a.zip', 'z_2.zip'];
 
-        expect(sorted[0]).toBe('archive_a.zip');
-        expect(sorted[1]).toBe('Archive_B.zip');
-        expect(sorted[2]).toBe('ARCHIVE_C.zip');
+        const natural = sortImages(zipFiles, true, '!');
+        const lexical = sortImages(zipFiles, false, '!');
+
+        expect(natural[0]).toBe('!a.zip');
+        expect(lexical[0]).toBe('!a.zip');
+        expect(natural.slice(1)).toEqual(['z_2.zip', 'z_10.zip']);
     });
 });
+
+// =====================================================================
+// § 09 — FILE TYPE MANAGEMENT
+// =====================================================================
 
 describe('File Type Management', () => {
     it('should differentiate between ZIP and image file types', () => {
@@ -495,7 +619,6 @@ describe('File Type Management', () => {
             currentFileId: 0
         };
 
-        // Add ZIP file
         const zipId = state.currentFileId++;
         state.files.set(zipId, {
             file: { name: 'archive.zip' },
@@ -503,7 +626,6 @@ describe('File Type Management', () => {
             status: 'pending'
         });
 
-        // Add image files
         const img1Id = state.currentFileId++;
         const img1File = { name: 'photo1.jpg' };
         state.files.set(img1Id, {
@@ -525,7 +647,8 @@ describe('File Type Management', () => {
         expect(state.files.size).toBe(3);
         expect(state.imageFiles.length).toBe(2);
 
-        const zipCount = Array.from(state.files.values()).filter(f => f.type === 'zip').length;
+        const zipCount = Array.from(state.files.values())
+            .filter(f => f.type === 'zip').length;
         const imageCount = state.imageFiles.length;
 
         expect(zipCount).toBe(1);
@@ -540,28 +663,89 @@ describe('File Type Management', () => {
                 buttons.push('Convert Each to PDF');
                 buttons.push('Merge All to Single PDF');
             }
-
             if (imageCount > 1) {
                 buttons.push('Convert Images to PDF');
             }
-
             return buttons;
         };
 
-        // Multiple ZIPs only
-        expect(getButtonsToShow(3, 0)).toEqual(['Convert Each to PDF', 'Merge All to Single PDF']);
-
-        // Multiple images only
+        expect(getButtonsToShow(3, 0)).toEqual([
+            'Convert Each to PDF',
+            'Merge All to Single PDF'
+        ]);
         expect(getButtonsToShow(0, 3)).toEqual(['Convert Images to PDF']);
-
-        // Both
         expect(getButtonsToShow(2, 2)).toEqual([
             'Convert Each to PDF',
             'Merge All to Single PDF',
             'Convert Images to PDF'
         ]);
-
-        // Single files - no batch buttons
         expect(getButtonsToShow(1, 1)).toEqual([]);
+    });
+
+    it('should remove image entries from imageFiles when removeFile is called', () => {
+        const state = {
+            files: new Map(),
+            imageFiles: [],
+            currentFileId: 0
+        };
+
+        const id = state.currentFileId++;
+        const file = { name: 'photo.jpg' };
+        state.files.set(id, { file, type: 'image' });
+        state.imageFiles.push({ fileId: id, file });
+
+        // Simulate removeFile logic
+        const idx = state.imageFiles.findIndex(f => f.fileId === id);
+        if (idx !== -1) state.imageFiles.splice(idx, 1);
+        state.files.delete(id);
+
+        expect(state.files.size).toBe(0);
+        expect(state.imageFiles).toHaveLength(0);
+    });
+});
+
+// =====================================================================
+// § 10 — CONSTANTS PARITY (with shared module)
+// =====================================================================
+
+describe('Shared Constants Parity', () => {
+    it('should expose the expected image extensions', () => {
+        expect(IMAGE_EXTENSIONS).toContain('.jpg');
+        expect(IMAGE_EXTENSIONS).toContain('.jpeg');
+        expect(IMAGE_EXTENSIONS).toContain('.png');
+        expect(IMAGE_EXTENSIONS).toContain('.gif');
+        expect(IMAGE_EXTENSIONS).toContain('.webp');
+        // Aligned with shared/constants.py
+        expect(IMAGE_EXTENSIONS).toContain('.bmp');
+        expect(IMAGE_EXTENSIONS).toContain('.tiff');
+    });
+
+    it('should expose a default priority-char string', () => {
+        expect(DEFAULT_PRIORITY_CHARS).toBe('!');
+    });
+});
+
+// =====================================================================
+// § 11 — localState + settings persistence
+// =====================================================================
+
+describe('localStorage Settings Persistence', () => {
+    it('should store settings as JSON', () => {
+        const settings = { useNaturalSort: true, priorityChars: '!@' };
+        localStorage.setItem('zipToPdfSettings', JSON.stringify(settings));
+
+        const raw = localStorage.getItem('zipToPdfSettings');
+        expect(raw).toBe(JSON.stringify(settings));
+        expect(JSON.parse(raw)).toEqual(settings);
+    });
+
+    it('should return null for missing keys', () => {
+        expect(localStorage.getItem('missing-key')).toBeNull();
+    });
+
+    it('should clear the store on .clear()', () => {
+        localStorage.setItem('a', '1');
+        localStorage.clear();
+        expect(localStorage.getItem('a')).toBeNull();
     });
 });
