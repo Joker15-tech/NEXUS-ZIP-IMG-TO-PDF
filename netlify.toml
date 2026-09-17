@@ -1,0 +1,72 @@
+# =====================================================================
+# NEXUS QUANTUM // Netlify Configuration
+# =====================================================================
+# File: netlify.toml
+#
+# This file OVERRIDES the UI settings — so even if you misconfigure
+# something in the Netlify dashboard, the values here win.
+#
+# Docs: https://docs.netlify.com/configure-builds/file-based-configuration/
+# =====================================================================
+
+[build]
+    base = "."
+    publish = "dist"
+    command = "bash scripts/build-netlify.sh"
+
+# ---- Environment -----------------------------------------------------
+[build.environment]
+    NODE_VERSION = "20"
+    NPM_FLAGS = "--no-audit --no-fund"
+    PYTHON_VERSION = "3.11"
+
+# ---- Redirects -------------------------------------------------------
+# SPA-style routing: everything falls back to /web/index.html
+[[redirects]]
+    from = "/"
+    to = "/web/index.html"
+    status = 200
+
+[[redirects]]
+    from = "/app"
+    to = "/web/index.html"
+    status = 200
+
+[[redirects]]
+    from = "/app/*"
+    to = "/web/index.html"
+    status = 200
+
+# 404 → custom page (if you add one later)
+[[redirects]]
+    from = "/*"
+    to = "/web/index.html"
+    status = 404
+
+# ---- Headers ---------------------------------------------------------
+[[headers]]
+    for = "/*"
+    [headers.values]
+        X-Frame-Options = "DENY"
+        X-Content-Type-Options = "nosniff"
+        Referrer-Policy = "strict-origin-when-cross-origin"
+        Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+[[headers]]
+    for = "/shared/*"
+    [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+# ---- Functions (désactivé — on n'en utilise pas) ---------------------
+# [functions]
+#     directory = "netlify/functions"
+
+# ---- Deploy context --------------------------------------------------
+[context.production]
+    command = "bash scripts/build-netlify.sh"
+
+[context.deploy-preview]
+    command = "bash scripts/build-netlify.sh"
+
+[context.branch-deploy]
+    command = "bash scripts/build-netlify.sh"
