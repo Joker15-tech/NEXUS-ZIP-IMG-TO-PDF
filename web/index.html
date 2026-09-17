@@ -1,197 +1,433 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nexus">
+<html lang="en" data-theme="nexus" data-app="nexus-quantum">
 
 <head>
-    <!-- ============================================================
-         META / SEO
-         ============================================================ -->
+    <!-- ================================================================
+         § 01 — META / ENCODING / VIEWPORT
+         ================================================================ -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="dark light">
-    <meta name="theme-color" content="#05060b" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#eef2fb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color"
+          content="#05060b"
+          media="(prefers-color-scheme: dark)">
+    <meta name="theme-color"
+          content="#eef2fb"
+          media="(prefers-color-scheme: light)">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <meta name="format-detection" content="address=no">
 
+    <!-- ================================================================
+         § 02 — SEO
+         ================================================================ -->
     <title>NEXUS QUANTUM // ZIP ⇄ PDF Converter</title>
 
-    <meta name="description" content="NEXUS QUANTUM — Convert ZIP archives or image sets into a single PDF. 100% client-side, no uploads, no telemetry.">
+    <meta name="description"
+          content="NEXUS QUANTUM — Convert ZIP archives or image sets into a single PDF. 100% client-side, no uploads, no telemetry, no tracking.">
     <meta name="author" content="NEXUS_QUANTUM">
-    <meta name="keywords" content="zip to pdf, images to pdf, client-side pdf, jszip, jspdf, nexus quantum">
-    <meta name="robots" content="index, follow">
+    <meta name="contact" content="drxenon487@gmail.com">
+    <meta name="keywords"
+          content="zip to pdf, images to pdf, client-side pdf, jszip, jspdf, nexus quantum, offline pdf converter, batch pdf, image batch">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="rating" content="general">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="application-name" content="NEXUS QUANTUM">
+    <meta name="generator" content="NEXUS-QUANTUM-v2.0.0">
+    <meta name="classification" content="Utility">
+    <meta name="category" content="Productivity">
 
-    <!-- Open Graph -->
+    <!-- ================================================================
+         § 03 — OPEN GRAPH
+         ================================================================ -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="NEXUS QUANTUM // ZIP ⇄ PDF Converter">
-    <meta property="og:description" content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
+    <meta property="og:description"
+          content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
     <meta property="og:site_name" content="NEXUS QUANTUM">
     <meta property="og:locale" content="en_US">
+    <meta property="og:determiner" content="the">
 
-    <!-- Twitter -->
+    <!-- ================================================================
+         § 04 — TWITTER / X
+         ================================================================ -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="NEXUS QUANTUM // ZIP ⇄ PDF Converter">
-    <meta name="twitter:description" content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
+    <meta name="twitter:description"
+          content="Convert ZIP archives or image sets into a single PDF. 100% client-side.">
     <meta name="twitter:creator" content="@NEXUS_QUANTUM">
     <meta name="twitter:site" content="@NEXUS_QUANTUM">
 
-    <!-- Favicon (inline SVG) -->
-    <link rel="icon" type="image/svg+xml"
+    <!-- ================================================================
+         § 05 — FAVICON (inline SVG)
+         ================================================================ -->
+    <link rel="icon"
+          type="image/svg+xml"
           href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2305060b'/><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/><circle cx='16' cy='18' r='2' fill='%23ff3cac'/></svg>">
 
-    <!-- Fonts -->
+    <link rel="apple-touch-icon"
+          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2305060b'/><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/></svg>">
+
+    <link rel="mask-icon"
+          href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%2300f0ff' stroke-width='2'/></svg>"
+          color="#00f0ff">
+
+    <!-- ================================================================
+         § 06 — RESOURCE HINTS
+         ================================================================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@300;400;600&family=Rajdhani:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-    <!-- Styles -->
+    <!-- ================================================================
+         § 07 — FONTS
+         ================================================================ -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@300;400;600&family=Rajdhani:wght@300;400;500;600;700&display=swap">
+
+    <!-- ================================================================
+         § 08 — LOCAL STYLES
+         ================================================================ -->
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body data-app-version="2.0.0-nexus">
+<body data-app-version="2.0.0-nexus"
+      data-app-codename="QUANTUM"
+      data-app-author="NEXUS_QUANTUM">
 
-<!-- ================================================================
-     SVG ICON SPRITE
-     ================================================================ -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-            stroke-linecap="round" stroke-linejoin="round">
+<!-- ====================================================================
+     § 09 — SVG ICON SPRITE
+     Référencé partout via <use href="#i-xxx">
+     ==================================================================== -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     style="display:none"
+     aria-hidden="true"
+     focusable="false">
+
+    <!-- ---------------------------------------------------------------
+         Upload arrow
+         --------------------------------------------------------------- -->
+    <symbol id="i-upload"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
     </symbol>
-    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Check
+         --------------------------------------------------------------- -->
+    <symbol id="i-check"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M5 13l4 4L19 7"/>
     </symbol>
-    <symbol id="i-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Error (X)
+         --------------------------------------------------------------- -->
+    <symbol id="i-error"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M6 18L18 6M6 6l12 12"/>
     </symbol>
-    <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Warning (triangle)
+         --------------------------------------------------------------- -->
+    <symbol id="i-warning"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </symbol>
-    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Info (circle i)
+         --------------------------------------------------------------- -->
+    <symbol id="i-info"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </symbol>
+
+    <!-- ---------------------------------------------------------------
+         GitHub
+         --------------------------------------------------------------- -->
     <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.1c-3.2.7-3.87-1.37-3.87-1.37-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 015.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.26 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
     </symbol>
+
+    <!-- ---------------------------------------------------------------
+         X / Twitter
+         --------------------------------------------------------------- -->
     <symbol id="i-x-twitter" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
     </symbol>
+
+    <!-- ---------------------------------------------------------------
+         Instagram
+         --------------------------------------------------------------- -->
     <symbol id="i-instagram" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
     </symbol>
-    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Mail
+         --------------------------------------------------------------- -->
+    <symbol id="i-mail"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
         <polyline points="22,6 12,13 2,6"/>
     </symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Sun (light theme indicator)
+         --------------------------------------------------------------- -->
+    <symbol id="i-sun"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <circle cx="12" cy="12" r="4"/>
         <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
     </symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Moon (dark theme indicator)
+         --------------------------------------------------------------- -->
+    <symbol id="i-moon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
     </symbol>
-    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ---------------------------------------------------------------
+         Keyboard
+         --------------------------------------------------------------- -->
+    <symbol id="i-keyboard"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round">
         <rect x="2" y="6" width="20" height="12" rx="2"/>
         <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
     </symbol>
+
+    <!-- ---------------------------------------------------------------
+         Zap (convert action)
+         --------------------------------------------------------------- -->
+    <symbol id="i-zap"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+
+    <!-- ---------------------------------------------------------------
+         Merge / Layers
+         --------------------------------------------------------------- -->
+    <symbol id="i-merge"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+    </symbol>
+
+    <!-- ---------------------------------------------------------------
+         Trash (remove)
+         --------------------------------------------------------------- -->
+    <symbol id="i-trash"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+    </symbol>
 </svg>
 
-<!-- ================================================================
-     AMBIENT BACKGROUND
-     ================================================================ -->
+<!-- ====================================================================
+     § 10 — AMBIENT BACKGROUND LAYERS
+     ==================================================================== -->
 <div class="bg-grid" aria-hidden="true"></div>
+
 <div class="bg-orbs" aria-hidden="true">
     <span class="orb orb-cyan"></span>
     <span class="orb orb-violet"></span>
     <span class="orb orb-magenta"></span>
 </div>
+
 <div class="scanlines" aria-hidden="true"></div>
 <div class="vignette" aria-hidden="true"></div>
 
-<!-- ================================================================
-     CONTAINER
-     ================================================================ -->
+<!-- ====================================================================
+     § 11 — NOSCRIPT FALLBACK
+     ==================================================================== -->
+<noscript>
+    <div class="noscript-warning" role="alert">
+        <strong>⚠ JavaScript is required.</strong>
+        NEXUS QUANTUM runs entirely in your browser — enable JavaScript to use it.
+    </div>
+</noscript>
+
+<!-- ====================================================================
+     § 12 — MAIN CONTAINER
+     ==================================================================== -->
 <div class="container">
 
-    <!-- ============================================================
-         HEADER
-         ============================================================ -->
-    <header class="hud-header">
-        <div class="hud-corner tl"></div>
-        <div class="hud-corner tr"></div>
-        <div class="hud-corner bl"></div>
-        <div class="hud-corner br"></div>
+    <!-- ================================================================
+         § 13 — HEADER (HUD)
+         ================================================================ -->
+    <header class="hud-header" role="banner">
+        <div class="hud-corner tl" aria-hidden="true"></div>
+        <div class="hud-corner tr" aria-hidden="true"></div>
+        <div class="hud-corner bl" aria-hidden="true"></div>
+        <div class="hud-corner br" aria-hidden="true"></div>
 
-        <div class="status-row">
-            <span class="status-dot"></span>
+        <!-- Status row -->
+        <div class="status-row" role="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
             <span class="status-text">SYSTEM ONLINE</span>
-            <span class="status-sep">//</span>
+            <span class="status-sep" aria-hidden="true">//</span>
             <span class="status-text dim">NODE: LOCAL</span>
-            <span class="status-sep">//</span>
+            <span class="status-sep" aria-hidden="true">//</span>
             <span class="status-text dim" id="hud-clock">--:--:--</span>
-            <span class="status-sep">//</span>
+            <span class="status-sep" aria-hidden="true">//</span>
             <span class="status-text dim" id="hud-version">v2.0.0-nexus</span>
         </div>
 
-        <h1 class="glitch">ZIPPED IMAGES <span class="arrow">→</span> PDF</h1>
+        <!-- Title -->
+        <h1 class="glitch" data-text="ZIPPED IMAGES → PDF">
+            ZIPPED IMAGES <span class="arrow" aria-hidden="true">→</span> PDF
+        </h1>
 
+        <!-- Subtitle -->
         <p class="subtitle">
-            <span class="bracket">[</span>
+            <span class="bracket" aria-hidden="true">[</span>
             Convert ZIP archives or image sets into a single PDF —
             <em>100% client-side</em>
-            <span class="bracket">]</span>
+            <span class="bracket" aria-hidden="true">]</span>
         </p>
 
-        <div class="header-actions">
-            <button type="button" class="icon-btn" id="themeToggleBtn" title="Toggle theme"
-                    aria-label="Toggle theme">
-                <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
-                <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        <!-- Quick actions -->
+        <div class="header-actions" role="toolbar" aria-label="Quick actions">
+            <button type="button"
+                    class="icon-btn"
+                    id="themeToggleBtn"
+                    title="Toggle theme (Ctrl+T)"
+                    aria-label="Toggle color theme">
+                <svg class="icon icon-sun" aria-hidden="true">
+                    <use href="#i-sun"/>
+                </svg>
+                <svg class="icon icon-moon" aria-hidden="true">
+                    <use href="#i-moon"/>
+                </svg>
             </button>
-            <button type="button" class="icon-btn" id="shortcutsToggleBtn"
-                    title="Keyboard shortcuts" aria-label="Keyboard shortcuts">
-                <svg class="icon" aria-hidden="true"><use href="#i-keyboard"/></svg>
+
+            <button type="button"
+                    class="icon-btn"
+                    id="shortcutsToggleBtn"
+                    title="Keyboard shortcuts (?)"
+                    aria-label="Show keyboard shortcuts">
+                <svg class="icon" aria-hidden="true">
+                    <use href="#i-keyboard"/>
+                </svg>
             </button>
         </div>
     </header>
 
-    <main>
+    <!-- ================================================================
+         § 14 — MAIN
+         ================================================================ -->
+    <main role="main">
 
         <!-- ============================================================
-             LIVE STATS HUD
+             § 15 — LIVE STATS HUD (injected by app.js renderStats)
              ============================================================ -->
-        <div id="nexus-stats" aria-live="polite" aria-atomic="true"></div>
+        <div id="nexus-stats"
+             class="stats-hud"
+             role="status"
+             aria-live="polite"
+             aria-atomic="true">
+            <!-- Populated by app.js -->
+        </div>
 
         <!-- ============================================================
-             01 · SETTINGS
+             § 16 — 01 · CONFIGURATION
              ============================================================ -->
         <section class="panel settings-section" aria-labelledby="settingsTitle">
             <div class="panel-head">
                 <div class="panel-title">
-                    <span class="panel-index">01</span>
+                    <span class="panel-index" aria-hidden="true">01</span>
                     <h2 id="settingsTitle">CONFIGURATION</h2>
                 </div>
-                <button type="button" class="btn btn-reset" id="resetSettingsBtn">
-                    <span class="btn-glow"></span>
+
+                <button type="button"
+                        class="btn btn-reset"
+                        id="resetSettingsBtn"
+                        title="Reset settings to defaults (Ctrl+R)">
+                    <span class="btn-glow" aria-hidden="true"></span>
                     ⟲ RESET DEFAULTS
                 </button>
             </div>
 
             <div class="settings-grid">
+                <!-- Natural sort toggle -->
                 <div class="setting-item">
                     <label class="checkbox-label" for="naturalSortEnabled">
-                        <input type="checkbox" id="naturalSortEnabled" checked>
+                        <input type="checkbox"
+                               id="naturalSortEnabled"
+                               checked>
                         <span class="checkbox-box" aria-hidden="true"></span>
                         <span class="checkbox-text">Enable Natural Sort</span>
                     </label>
+
                     <p class="setting-description">
                         Sorts numeric tokens in filenames.<br>
                         <code>page_1 · page_2 · page_10</code>
@@ -200,17 +436,23 @@
                     </p>
                 </div>
 
+                <!-- Priority characters -->
                 <div class="setting-item">
-                    <label for="priorityChars" class="field-label">Priority Characters</label>
-                    <input
-                        type="text"
-                        id="priorityChars"
-                        value="!"
-                        placeholder="e.g.: !@"
-                        autocomplete="off"
-                        spellcheck="false"
-                        maxlength="32"
-                        aria-describedby="priorityCharsHelp">
+                    <label for="priorityChars" class="field-label">
+                        Priority Characters
+                    </label>
+
+                    <input type="text"
+                           id="priorityChars"
+                           value="!"
+                           placeholder="e.g.: !@"
+                           autocomplete="off"
+                           spellcheck="false"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           maxlength="32"
+                           aria-describedby="priorityCharsHelp">
+
                     <p class="setting-description" id="priorityCharsHelp">
                         Images starting with these chars are ordered first.
                     </p>
@@ -219,37 +461,51 @@
         </section>
 
         <!-- ============================================================
-             02 · UPLOAD
+             § 17 — 02 · INPUT STREAM (upload)
              ============================================================ -->
         <section class="panel upload-section" aria-labelledby="uploadTitle">
             <div class="panel-head">
                 <div class="panel-title">
-                    <span class="panel-index">02</span>
+                    <span class="panel-index" aria-hidden="true">02</span>
                     <h2 id="uploadTitle">INPUT STREAM</h2>
                 </div>
-                <span class="panel-tag">ACCEPT: .zip · jpg · jpeg · png · gif · webp</span>
+
+                <span class="panel-tag">
+                    ACCEPT: .zip · jpg · jpeg · png · gif · webp
+                </span>
             </div>
 
-            <div class="drop-zone" id="dropZone" role="button" tabindex="0"
-                 aria-label="Drop files or click to browse">
+            <!-- Drop zone -->
+            <div class="drop-zone"
+                 id="dropZone"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Drop files here or click to browse">
+
                 <div class="drop-zone-inner">
-                    <svg class="upload-icon" aria-hidden="true"><use href="#i-upload"/></svg>
+                    <svg class="upload-icon" aria-hidden="true">
+                        <use href="#i-upload"/>
+                    </svg>
+
                     <p class="drop-text">DROP ARCHIVES OR IMAGES HERE</p>
                     <p class="drop-sub">or click to browse local filesystem</p>
 
-                    <input
-                        type="file"
-                        id="fileInput"
-                        accept=".zip,.jpg,.jpeg,.png,.gif,.webp"
-                        multiple
-                        hidden>
+                    <!-- Hidden file input -->
+                    <input type="file"
+                           id="fileInput"
+                           accept=".zip,.jpg,.jpeg,.png,.gif,.webp"
+                           multiple
+                           hidden>
 
-                    <button type="button" class="btn btn-select"
+                    <!-- Select button -->
+                    <button type="button"
+                            class="btn btn-select"
                             onclick="document.getElementById('fileInput').click()">
-                        <span class="btn-glow"></span>
+                        <span class="btn-glow" aria-hidden="true"></span>
                         ⬢ SELECT FILES
                     </button>
 
+                    <!-- Hints -->
                     <p class="drop-hint">
                         <kbd>Ctrl</kbd>+<kbd>O</kbd> browse ·
                         <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> clear
@@ -259,26 +515,35 @@
         </section>
 
         <!-- ============================================================
-             CONVERT ACTIONS (injected by app.js)
+             § 18 — BULK CONVERT ACTIONS (injected by app.js)
              ============================================================ -->
-        <section class="convert-all-section" id="convertAllSection"
-                 style="display: none;" aria-label="Bulk conversion actions">
-            <div class="button-group" id="convertButtonGroup"></div>
+        <section class="convert-all-section"
+                 id="convertAllSection"
+                 style="display: none;"
+                 aria-label="Bulk conversion actions">
+
+            <div class="button-group" id="convertButtonGroup">
+                <!-- Injected by app.js renderBulkActions() -->
+            </div>
         </section>
 
         <!-- ============================================================
-             FILE LIST (injected by app.js)
+             § 19 — FILE QUEUE (injected by app.js)
              ============================================================ -->
-        <section class="file-list" id="fileList"
-                 aria-live="polite" aria-label="File queue"></section>
+        <section class="file-list"
+                 id="fileList"
+                 aria-live="polite"
+                 aria-label="File queue">
+            <!-- Injected by app.js renderFileList() -->
+        </section>
 
         <!-- ============================================================
-             03 · FEATURES
+             § 20 — 03 · CORE CAPABILITIES
              ============================================================ -->
         <section class="panel info-section" aria-labelledby="featuresTitle">
             <div class="panel-head">
                 <div class="panel-title">
-                    <span class="panel-index">03</span>
+                    <span class="panel-index" aria-hidden="true">03</span>
                     <h2 id="featuresTitle">CORE CAPABILITIES</h2>
                 </div>
             </div>
@@ -288,38 +553,53 @@
                     <span class="feat-id">F-01</span>
                     Convert ZIP archives containing images into a single PDF
                 </li>
+
                 <li>
                     <span class="feat-id">F-02</span>
                     Batch multiple image files into a single PDF
                 </li>
+
                 <li>
                     <span class="feat-id">F-03</span>
-                    Configurable natural sort <code>page_1 · page_2 · page_10</code>
+                    Configurable natural sort
+                    <code>page_1 · page_2 · page_10</code>
                 </li>
+
                 <li>
                     <span class="feat-id">F-04</span>
                     Priority character routing (default <code>!</code>)
                 </li>
+
                 <li>
                     <span class="feat-id">F-05</span>
-                    Supports <code>JPG</code> <code>JPEG</code> <code>PNG</code> <code>GIF</code> <code>WebP</code>
+                    Supports
+                    <code>JPG</code>
+                    <code>JPEG</code>
+                    <code>PNG</code>
+                    <code>GIF</code>
+                    <code>WebP</code>
                 </li>
+
                 <li>
                     <span class="feat-id">F-06</span>
                     100% client-side — files never leave your device
                 </li>
+
                 <li>
                     <span class="feat-id">F-07</span>
                     ZIP bomb protection · path traversal guards
                 </li>
+
                 <li>
                     <span class="feat-id">F-08</span>
                     Drag-to-reorder · live thumbnails · ETA progress
                 </li>
+
                 <li>
                     <span class="feat-id">F-09</span>
                     Duplicate detection via SHA-256 hashing
                 </li>
+
                 <li>
                     <span class="feat-id">F-10</span>
                     Keyboard shortcuts · cancelable conversions
@@ -328,61 +608,96 @@
         </section>
 
         <!-- ============================================================
-             04 · RECENT ACTIVITY
+             § 21 — 04 · RECENT ACTIVITY (history)
              ============================================================ -->
         <section class="panel info-section" aria-labelledby="historyTitle">
             <div class="panel-head">
                 <div class="panel-title">
-                    <span class="panel-index">04</span>
+                    <span class="panel-index" aria-hidden="true">04</span>
                     <h2 id="historyTitle">RECENT ACTIVITY</h2>
                 </div>
-                <button type="button" class="btn btn-reset" id="clearHistoryBtn">
-                    <span class="btn-glow"></span>
+
+                <button type="button"
+                        class="btn btn-reset"
+                        id="clearHistoryBtn"
+                        title="Clear conversion log">
+                    <span class="btn-glow" aria-hidden="true"></span>
                     ⟲ CLEAR LOG
                 </button>
             </div>
-            <div id="nexus-history" aria-live="polite"></div>
+
+            <div id="nexus-history"
+                 aria-live="polite"
+                 aria-label="Conversion history">
+                <!-- Injected by app.js renderHistory() -->
+            </div>
         </section>
 
         <!-- ============================================================
-             05 · SHORTCUTS (collapsible)
+             § 22 — 05 · KEYBOARD SHORTCUTS (collapsible)
              ============================================================ -->
-        <section class="panel info-section shortcuts-panel" id="shortcutsPanel" hidden
+        <section class="panel info-section shortcuts-panel"
+                 id="shortcutsPanel"
+                 hidden
                  aria-labelledby="shortcutsTitle">
+
             <div class="panel-head">
                 <div class="panel-title">
-                    <span class="panel-index">05</span>
+                    <span class="panel-index" aria-hidden="true">05</span>
                     <h2 id="shortcutsTitle">KEYBOARD SHORTCUTS</h2>
                 </div>
-                <button type="button" class="btn btn-reset" id="shortcutsCloseBtn">
-                    <span class="btn-glow"></span>
+
+                <button type="button"
+                        class="btn btn-reset"
+                        id="shortcutsCloseBtn"
+                        title="Close shortcuts panel">
+                    <span class="btn-glow" aria-hidden="true"></span>
                     ✕ CLOSE
                 </button>
             </div>
 
             <div class="shortcut-grid">
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>O</kbd></span>
+                    <span class="shortcut-keys">
+                        <kbd>Ctrl</kbd>+<kbd>O</kbd>
+                    </span>
                     <span class="shortcut-desc">Open file picker</span>
                 </div>
+
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd></span>
+                    <span class="shortcut-keys">
+                        <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>
+                    </span>
                     <span class="shortcut-desc">Clear entire queue</span>
                 </div>
+
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>Esc</kbd></span>
-                    <span class="shortcut-desc">Close modals · cancel active conversion</span>
+                    <span class="shortcut-keys">
+                        <kbd>Esc</kbd>
+                    </span>
+                    <span class="shortcut-desc">
+                        Close modals · cancel active conversion
+                    </span>
                 </div>
+
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>R</kbd></span>
+                    <span class="shortcut-keys">
+                        <kbd>Ctrl</kbd>+<kbd>R</kbd>
+                    </span>
                     <span class="shortcut-desc">Reset settings to defaults</span>
                 </div>
+
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>T</kbd></span>
+                    <span class="shortcut-keys">
+                        <kbd>Ctrl</kbd>+<kbd>T</kbd>
+                    </span>
                     <span class="shortcut-desc">Toggle theme (dark / light)</span>
                 </div>
+
                 <div class="shortcut-row">
-                    <span class="shortcut-keys"><kbd>?</kbd></span>
+                    <span class="shortcut-keys">
+                        <kbd>?</kbd>
+                    </span>
                     <span class="shortcut-desc">Show this panel</span>
                 </div>
             </div>
@@ -390,200 +705,278 @@
 
     </main>
 
-    <!-- ============================================================
-         FOOTER
-         ============================================================ -->
-    <footer class="hud-footer">
+    <!-- ================================================================
+         § 23 — FOOTER
+         ================================================================ -->
+    <footer class="hud-footer" role="contentinfo">
         <div class="footer-left">
-            <span class="brand">NEXUS<span class="brand-dot">_</span>QUANTUM</span>
-            <span class="footer-sep">//</span>
+            <span class="brand">
+                NEXUS<span class="brand-dot" aria-hidden="true">_</span>QUANTUM
+            </span>
+            <span class="footer-sep" aria-hidden="true">//</span>
             <span class="footer-meta">MIT LICENSE</span>
-            <span class="footer-sep">//</span>
+            <span class="footer-sep" aria-hidden="true">//</span>
             <span class="footer-meta" id="footer-uptime">SESSION 00:00</span>
         </div>
 
-        <div class="footer-socials">
-            <a href="https://github.com/NEXUS-QUANTUM/NEXUS-ZIP-IMG-TO-PDF/"
-               target="_blank" rel="noopener noreferrer"
-               class="social-link" title="GitHub Repository"
-               aria-label="GitHub Repository">
-                <svg class="social-icon" aria-hidden="true"><use href="#i-github"/></svg>
+        <div class="footer-socials" role="list">
+            <a href="https://github.com/9bow/zipped-imgs-to-pdf"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="social-link"
+               title="GitHub Repository"
+               aria-label="GitHub Repository"
+               role="listitem">
+                <svg class="social-icon" aria-hidden="true">
+                    <use href="#i-github"/>
+                </svg>
                 <span class="social-label">GITHUB</span>
             </a>
+
             <a href="https://x.com/NEXUS_QUANTUM"
-               target="_blank" rel="noopener noreferrer"
-               class="social-link" title="X / Twitter — @NEXUS_QUANTUM"
-               aria-label="X / Twitter — @NEXUS_QUANTUM">
-                <svg class="social-icon" aria-hidden="true"><use href="#i-x-twitter"/></svg>
+               target="_blank"
+               rel="noopener noreferrer"
+               class="social-link"
+               title="X / Twitter — @NEXUS_QUANTUM"
+               aria-label="X / Twitter — @NEXUS_QUANTUM"
+               role="listitem">
+                <svg class="social-icon" aria-hidden="true">
+                    <use href="#i-x-twitter"/>
+                </svg>
                 <span class="social-label">@NEXUS_QUANTUM</span>
             </a>
+
             <a href="https://instagram.com/NEXUS_QUANTUM"
-               target="_blank" rel="noopener noreferrer"
-               class="social-link" title="Instagram — @NEXUS_QUANTUM"
-               aria-label="Instagram — @NEXUS_QUANTUM">
-                <svg class="social-icon" aria-hidden="true"><use href="#i-instagram"/></svg>
+               target="_blank"
+               rel="noopener noreferrer"
+               class="social-link"
+               title="Instagram — @NEXUS_QUANTUM"
+               aria-label="Instagram — @NEXUS_QUANTUM"
+               role="listitem">
+                <svg class="social-icon" aria-hidden="true">
+                    <use href="#i-instagram"/>
+                </svg>
                 <span class="social-label">@NEXUS_QUANTUM</span>
             </a>
+
             <a href="mailto:drxenon487@gmail.com"
-               class="social-link" title="Email — drxenon487@gmail.com"
-               aria-label="Send email to drxenon487@gmail.com">
-                <svg class="social-icon" aria-hidden="true"><use href="#i-mail"/></svg>
+               class="social-link"
+               title="Email — drxenon487@gmail.com"
+               aria-label="Send email to drxenon487@gmail.com"
+               role="listitem">
+                <svg class="social-icon" aria-hidden="true">
+                    <use href="#i-mail"/>
+                </svg>
                 <span class="social-label">drxenon487@gmail.com</span>
             </a>
         </div>
     </footer>
+
 </div>
 
-<!-- ================================================================
-     PROGRESS MODAL
-     ================================================================ -->
-<div class="modal" id="progressModal" role="dialog" aria-modal="true"
-     aria-labelledby="progressTitle">
+<!-- ====================================================================
+     § 24 — PROGRESS MODAL
+     ==================================================================== -->
+<div class="modal"
+     id="progressModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="progressTitle"
+     aria-describedby="progressInfo">
+
     <div class="modal-content">
-        <div class="modal-scan"></div>
+        <div class="modal-scan" aria-hidden="true"></div>
 
         <h2 id="progressTitle">
-            <span class="pulse-dot"></span>
+            <span class="pulse-dot" aria-hidden="true"></span>
             CONVERTING
         </h2>
 
-        <div class="progress-info" id="progressInfo">Preparing…</div>
+        <div class="progress-info" id="progressInfo">
+            Preparing…
+        </div>
 
-        <div class="progress-bar" id="progressBarEl" role="progressbar"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar"
+             id="progressBarEl"
+             role="progressbar"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="0">
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
         <div class="progress-text" id="progressText">0%</div>
 
-        <button type="button" class="btn btn-reset" id="progressCancelBtn">
-            <span class="btn-glow"></span>
+        <button type="button"
+                class="btn btn-reset"
+                id="progressCancelBtn"
+                title="Cancel conversion (Esc)">
+            <span class="btn-glow" aria-hidden="true"></span>
             ✕ CANCEL
         </button>
     </div>
 </div>
 
-<!-- ================================================================
-     NOTIFICATION MODAL
-     ================================================================ -->
-<div class="modal" id="notificationModal" role="dialog" aria-modal="true"
-     aria-labelledby="notificationTitle">
-    <div class="modal-content notification-modal">
-        <div class="modal-scan"></div>
+<!-- ====================================================================
+     § 25 — NOTIFICATION MODAL
+     ==================================================================== -->
+<div class="modal"
+     id="notificationModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="notificationTitle"
+     aria-describedby="notificationMessage">
 
-        <div class="notification-icon" id="notificationIcon" aria-hidden="true"></div>
+    <div class="modal-content notification-modal">
+        <div class="modal-scan" aria-hidden="true"></div>
+
+        <div class="notification-icon"
+             id="notificationIcon"
+             aria-hidden="true">
+            <!-- Injected by app.js showNotification() -->
+        </div>
 
         <h2 id="notificationTitle">Notification</h2>
 
-        <div class="notification-message" id="notificationMessage"></div>
+        <div class="notification-message" id="notificationMessage">
+            <!-- Injected -->
+        </div>
 
-        <button type="button" class="btn btn-primary" id="notificationCloseBtn">
-            <span class="btn-glow"></span>
+        <button type="button"
+                class="btn btn-primary"
+                id="notificationCloseBtn">
+            <span class="btn-glow" aria-hidden="true"></span>
             ACKNOWLEDGE
         </button>
     </div>
 </div>
 
-<!-- ================================================================
-     CONFIRM MODAL
-     ================================================================ -->
-<div class="modal" id="confirmModal" role="dialog" aria-modal="true"
-     aria-labelledby="confirmTitle">
+<!-- ====================================================================
+     § 26 — CONFIRM MODAL (promise-based via window.nexusConfirm)
+     ==================================================================== -->
+<div class="modal"
+     id="confirmModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="confirmTitle"
+     aria-describedby="confirmMessage">
+
     <div class="modal-content notification-modal">
-        <div class="modal-scan"></div>
+        <div class="modal-scan" aria-hidden="true"></div>
 
         <div class="notification-icon warning" aria-hidden="true">
-            <svg><use href="#i-warning"/></svg>
+            <svg style="width:56px;height:56px">
+                <use href="#i-warning"/>
+            </svg>
         </div>
 
         <h2 id="confirmTitle">Confirm Action</h2>
 
-        <div class="notification-message" id="confirmMessage">Are you sure?</div>
+        <div class="notification-message" id="confirmMessage">
+            Are you sure?
+        </div>
 
         <div class="confirm-actions">
-            <button type="button" class="btn btn-reset" id="confirmCancelBtn">
-                <span class="btn-glow"></span>
+            <button type="button"
+                    class="btn btn-reset"
+                    id="confirmCancelBtn">
+                <span class="btn-glow" aria-hidden="true"></span>
                 CANCEL
             </button>
-            <button type="button" class="btn btn-primary" id="confirmOkBtn">
-                <span class="btn-glow"></span>
+
+            <button type="button"
+                    class="btn btn-primary btn-confirm-ok"
+                    id="confirmOkBtn">
+                <span class="btn-glow" aria-hidden="true"></span>
                 CONFIRM
             </button>
         </div>
     </div>
 </div>
 
-<!-- ================================================================
-     EXTERNAL LIBRARIES
-     ================================================================ -->
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"></script>
+<!-- ====================================================================
+     § 27 — EXTERNAL LIBRARIES (pinned CDN versions)
+     ==================================================================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
 
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
 
-<!-- ================================================================
-     SHARED LOGIC
-     ================================================================ -->
+<!-- ====================================================================
+     § 28 — SHARED MODULES
+     IMPORTANT: constants.js MUST load before sorting-logic.js and app.js
+     ==================================================================== -->
+<script src="../shared/constants.js"></script>
 <script src="../shared/sorting-logic.js"></script>
 
-<!-- ================================================================
-     APPLICATION
-     ================================================================ -->
+<!-- ====================================================================
+     § 29 — APPLICATION
+     ==================================================================== -->
 <script src="app.js"></script>
 
-<!-- ================================================================
-     INLINE UI GLUE (cosmetic + helper)
-     ================================================================ -->
+<!-- ====================================================================
+     § 30 — INLINE UI GLUE
+     Cosmetic + helpers. Does NOT touch app.js business logic.
+     ==================================================================== -->
 <script>
 (function () {
     'use strict';
 
-    /* ---------------------------------------------------------------
-       HUD clock
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.1 — HUD CLOCK
+       ================================================================ */
     const clockEl = document.getElementById('hud-clock');
+
     if (clockEl) {
         const pad = n => String(n).padStart(2, '0');
+
         const tick = () => {
             const d = new Date();
             clockEl.textContent =
                 `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         };
+
         tick();
         setInterval(tick, 1000);
     }
 
-    /* ---------------------------------------------------------------
-       Footer session uptime
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.2 — SESSION UPTIME (footer)
+       ================================================================ */
     const uptimeEl = document.getElementById('footer-uptime');
+
     if (uptimeEl) {
         const start = Date.now();
         const pad = n => String(n).padStart(2, '0');
+
         const tick = () => {
             const s = Math.floor((Date.now() - start) / 1000);
             const m = Math.floor(s / 60);
             uptimeEl.textContent = `SESSION ${pad(m)}:${pad(s % 60)}`;
         };
+
         tick();
         setInterval(tick, 1000);
     }
 
-    /* ---------------------------------------------------------------
-       Theme toggle
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.3 — THEME TOGGLE (dark / light), persisted
+       ================================================================ */
     const THEME_KEY = 'zipToPdfTheme';
     const themeBtn = document.getElementById('themeToggleBtn');
 
     function applyTheme(theme) {
         document.documentElement.dataset.theme = theme || 'nexus';
-        try { localStorage.setItem(THEME_KEY, theme || 'nexus'); } catch (_) {}
+        try {
+            localStorage.setItem(THEME_KEY, theme || 'nexus');
+        } catch (_) {
+            /* storage disabled — ignore */
+        }
     }
+
     function currentTheme() {
         return document.documentElement.dataset.theme || 'nexus';
     }
@@ -591,7 +984,9 @@
     try {
         const saved = localStorage.getItem(THEME_KEY);
         if (saved) applyTheme(saved);
-    } catch (_) {}
+    } catch (_) {
+        /* ignore */
+    }
 
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -599,9 +994,9 @@
         });
     }
 
-    /* ---------------------------------------------------------------
-       Shortcuts panel
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.4 — SHORTCUTS PANEL
+       ================================================================ */
     const shortcutsPanel = document.getElementById('shortcutsPanel');
     const shortcutsToggleBtn = document.getElementById('shortcutsToggleBtn');
     const shortcutsCloseBtn = document.getElementById('shortcutsCloseBtn');
@@ -610,37 +1005,48 @@
         if (!shortcutsPanel) return;
         shortcutsPanel.hidden = !show;
         if (show) {
-            shortcutsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            shortcutsPanel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
     }
 
     if (shortcutsToggleBtn) {
-        shortcutsToggleBtn.addEventListener('click', () =>
-            showShortcuts(shortcutsPanel ? shortcutsPanel.hidden : true));
-    }
-    if (shortcutsCloseBtn) {
-        shortcutsCloseBtn.addEventListener('click', () => showShortcuts(false));
+        shortcutsToggleBtn.addEventListener('click', () => {
+            const isHidden = shortcutsPanel ? shortcutsPanel.hidden : true;
+            showShortcuts(isHidden);
+        });
     }
 
-    /* ---------------------------------------------------------------
-       Progress bar aria sync
-       --------------------------------------------------------------- */
+    if (shortcutsCloseBtn) {
+        shortcutsCloseBtn.addEventListener('click', () => {
+            showShortcuts(false);
+        });
+    }
+
+    /* ================================================================
+       § 30.5 — PROGRESS BAR ARIA SYNC (MutationObserver)
+       ================================================================ */
     const progressFill = document.getElementById('progressFill');
     const progressBarEl = document.getElementById('progressBarEl');
+
     if (progressFill && progressBarEl && window.MutationObserver) {
         const sync = () => {
             const v = parseInt(progressFill.style.width, 10) || 0;
             progressBarEl.setAttribute('aria-valuenow', String(v));
         };
+
         new MutationObserver(sync).observe(progressFill, {
             attributes: true,
             attributeFilter: ['style']
         });
     }
 
-    /* ---------------------------------------------------------------
-       Confirm modal (promise-based)
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.6 — CONFIRM MODAL (promise-based helper)
+       Exposed as window.nexusConfirm(message) -> Promise<boolean>
+       ================================================================ */
     const confirmModal = document.getElementById('confirmModal');
     const confirmMsg = document.getElementById('confirmMessage');
     const confirmOk = document.getElementById('confirmOkBtn');
@@ -650,7 +1056,9 @@
 
     window.nexusConfirm = function (message) {
         return new Promise(resolve => {
-            if (!confirmModal) return resolve(window.confirm(message));
+            if (!confirmModal) {
+                return resolve(window.confirm(message));
+            }
             confirmMsg.textContent = message;
             confirmModal.classList.add('active');
             confirmResolver = resolve;
@@ -658,7 +1066,9 @@
     };
 
     function closeConfirm(result) {
-        if (confirmModal) confirmModal.classList.remove('active');
+        if (confirmModal) {
+            confirmModal.classList.remove('active');
+        }
         if (confirmResolver) {
             const r = confirmResolver;
             confirmResolver = null;
@@ -666,27 +1076,42 @@
         }
     }
 
-    if (confirmOk) confirmOk.addEventListener('click', () => closeConfirm(true));
-    if (confirmCancel) confirmCancel.addEventListener('click', () => closeConfirm(false));
+    if (confirmOk) {
+        confirmOk.addEventListener('click', () => closeConfirm(true));
+    }
+
+    if (confirmCancel) {
+        confirmCancel.addEventListener('click', () => closeConfirm(false));
+    }
+
     if (confirmModal) {
         confirmModal.addEventListener('click', (e) => {
             if (e.target === confirmModal) closeConfirm(false);
         });
     }
 
-    /* ---------------------------------------------------------------
-       Extra keyboard shortcuts
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.7 — EXTRA KEYBOARD SHORTCUTS
+       ================================================================ */
     document.addEventListener('keydown', (e) => {
         const tag = (e.target.tagName || '').toLowerCase();
-        const typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+        const typing =
+            tag === 'input' ||
+            tag === 'textarea' ||
+            e.target.isContentEditable;
 
-        if (e.key === 'Escape' && confirmModal && confirmModal.classList.contains('active')) {
+        // Esc closes confirm modal first (topmost)
+        if (
+            e.key === 'Escape' &&
+            confirmModal &&
+            confirmModal.classList.contains('active')
+        ) {
             e.stopPropagation();
             closeConfirm(false);
             return;
         }
 
+        // Ctrl+R → reset settings (prevent browser reload)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
             e.preventDefault();
             const btn = document.getElementById('resetSettingsBtn');
@@ -694,22 +1119,25 @@
             return;
         }
 
+        // Ctrl+T → toggle theme (prevent new tab)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
             e.preventDefault();
             if (themeBtn) themeBtn.click();
             return;
         }
 
+        // "?" → show shortcuts (only when not typing)
         if (e.key === '?' && !typing) {
             e.preventDefault();
             showShortcuts(true);
         }
     });
 
-    /* ---------------------------------------------------------------
-       Drop zone keyboard accessibility
-       --------------------------------------------------------------- */
+    /* ================================================================
+       § 30.8 — DROP ZONE KEYBOARD ACCESSIBILITY
+       ================================================================ */
     const dropZone = document.getElementById('dropZone');
+
     if (dropZone) {
         dropZone.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -719,8 +1147,55 @@
             }
         });
     }
+
+    /* ================================================================
+       § 30.9 — GLOBAL ERROR HANDLERS (best-effort UX)
+       ================================================================ */
+    window.addEventListener('error', (e) => {
+        if (e && e.error instanceof Error) {
+            console.error('[NEXUS] Uncaught error:', e.error);
+        }
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+        console.error('[NEXUS] Unhandled rejection:', e.reason);
+    });
+
+    /* ================================================================
+       § 30.10 — BOOT LOG (console banner)
+       ================================================================ */
+    console.info(
+        '%c NEXUS QUANTUM %c v2.0.0 ',
+        'background:#00f0ff;color:#000;font-weight:bold;padding:2px 6px;border-radius:2px 0 0 2px;',
+        'background:#8a5cff;color:#fff;font-weight:bold;padding:2px 6px;border-radius:0 2px 2px 0;'
+    );
+
+    /* ================================================================
+       § 30.11 — STARTUP READINESS CHECK
+       ================================================================ */
+    const missing = [];
+
+    if (typeof window.JSZip === 'undefined') missing.push('JSZip');
+    if (typeof window.jspdf === 'undefined') missing.push('jsPDF');
+    if (typeof window.NexusConstants === 'undefined') missing.push('NexusConstants');
+    if (typeof window.NexusSorting === 'undefined') missing.push('NexusSorting');
+    if (typeof window.__nexus === 'undefined') missing.push('__nexus');
+
+    if (missing.length > 0) {
+        console.warn(
+            '[NEXUS] Missing dependencies:',
+            missing.join(', '),
+            '— check script loading order.'
+        );
+    } else {
+        console.info(
+            '%c[NEXUS] All systems nominal — v2.0.0-nexus ready.',
+            'color:#b6ff3c;font-weight:bold;'
+        );
+    }
 })();
 </script>
 
 </body>
+
 </html>
