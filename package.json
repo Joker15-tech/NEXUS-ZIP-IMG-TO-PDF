@@ -77,6 +77,7 @@
     "browser": "web/app.js",
 
     "scripts": {
+        "build:netlify": "bash scripts/build-netlify.sh",
         "// ─── TESTING ───────────────────────────────────": "",
         "test": "vitest run",
         "test:watch": "vitest",
