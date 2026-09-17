@@ -1,1 +1,39 @@
-Pillow>=10.0.0
+
+# =====================================================================
+# Runtime dependencies for zipped-imgs-to-pdf
+# =====================================================================
+#
+# Install:
+#     pip install -r python/requirements.txt
+#
+# For development (tests, lint, type-check):
+#     pip install -r requirements-dev.txt
+#
+# Python:   >= 3.9
+# Platform: Linux / macOS / Windows
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Image processing — required at runtime
+# ---------------------------------------------------------------------
+# Pillow is used to:
+#   - Open / decode JPG, PNG, GIF, BMP, TIFF, WEBP
+#   - Convert RGBA / P / LA modes to RGB (PDF compatibility)
+#   - Write multi-page PDF via Image.save(..., save_all=True)
+#
+# Security floor:
+#   - >=10.1.0 fixes CVE-2023-44271 (ImageFont DoS)
+#   - >=10.3.0 fixes CVE-2024-28219 (buffer overflow in _imagingcms)
+# Upper bound:
+#   - <11.0 to protect against future API changes on the PDF writer
+#
+Pillow>=10.3.0,<11.0.0
+
+# ---------------------------------------------------------------------
+# Typing backports — needed on Python 3.9
+# ---------------------------------------------------------------------
+# The shared module uses `from __future__ import annotations` and
+# `list[int | str]`-style hints, which work natively on 3.10+.
+# On 3.9, typing_extensions provides the required shims.
+#
+typing_extensions>=4.8.0,<5.0.0 ; python_version < "3.10"
