@@ -78,7 +78,7 @@
 <div class="container" style="max-width: 1200px;">
 
     <!-- ============================================================
-         TOPBAR — brand left · socials right (compact)
+         TOPBAR — brand left · socials right
          ============================================================ -->
     <div class="hud-header"
          style="padding: 14px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
@@ -95,8 +95,7 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <!-- Social icons -->
-            <a href="https://github.com/Joker15-tech/NEXUS-ZIP-IMG-TO-PDF/" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/Joker15-tech/NEXUS-ZIP-IMG-TO-PDFf" target="_blank" rel="noopener noreferrer"
                class="icon-btn" title="GitHub" aria-label="GitHub" style="width: 28px; height: 28px;">
                 <svg style="width: 14px; height: 14px;"><use href="#i-github"/></svg>
             </a>
@@ -135,7 +134,6 @@
 
             <span style="width: 1px; height: 14px; background: var(--border); margin: 0 4px;" aria-hidden="true"></span>
 
-            <!-- Action buttons -->
             <button type="button" class="icon-btn" id="themeToggleBtn" title="Toggle theme (Ctrl+T)"
                     aria-label="Toggle theme" style="width: 28px; height: 28px;">
                 <svg class="icon-sun" style="width: 14px; height: 14px; display:none;"><use href="#i-sun"/></svg>
@@ -506,16 +504,133 @@
 </div>
 
 <!-- ====================================================================
-     SCRIPTS
+     BOOTSTRAP HYBRIDE — local d'abord, CDN en fallback
+     --------------------------------------------------------------------
+     • Local : web/vendor/*.js   (offline, instantané)
+     • CDN   : cdnjs.cloudflare.com (fallback si vendor/ absent)
+     Ordre garanti : JSZip → jsPDF → constants → sorting → app
      ==================================================================== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="../shared/constants.js"></script>
-<script src="../shared/sorting-logic.js"></script>
-<script src="app.js"></script>
+<script>
+(function () {
+    'use strict';
 
+    /* ------------------------------------------------------------------
+       Bibliothèques externes : { name, local, cdn, check }
+       `check` vérifie que le symbole global est bien défini après load.
+       ------------------------------------------------------------------ */
+    var EXTERNAL_LIBS = [
+        {
+            name:  'JSZip',
+            local: 'vendor/jszip.min.js',
+            cdn:   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+            check: function () { return typeof window.JSZip === 'function'; }
+        },
+        {
+            name:  'jsPDF',
+            local: 'vendor/jspdf.umd.min.js',
+            cdn:   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+            check: function () { return typeof window.jspdf !== 'undefined'
+                                     && typeof window.jspdf.jsPDF === 'function'; }
+        }
+    ];
+
+    /* ------------------------------------------------------------------
+       Charge un script et résout quand il est prêt.
+       ------------------------------------------------------------------ */
+    function loadScript(src, attrs) {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.async = false;   // préserve l'ordre entre scripts
+            s.defer = false;
+            if (attrs) {
+                Object.keys(attrs).forEach(function (k) {
+                    s.setAttribute(k, attrs[k]);
+                });
+            }
+            s.onload  = function () { resolve(src); };
+            s.onerror = function () { reject(new Error('Cannot load ' + src)); };
+            document.head.appendChild(s);
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       Charge une lib : local d'abord, puis CDN si échec.
+       ------------------------------------------------------------------ */
+    function loadExternal(lib) {
+        return loadScript(lib.local)
+            .then(function () {
+                if (!lib.check()) throw new Error('symbol missing after local load');
+                console.info('[NEXUS] ' + lib.name + ' ← local (vendor/)');
+                return 'local';
+            })
+            .catch(function () {
+                console.warn('[NEXUS] ' + lib.name + ' local unavailable → CDN fallback');
+                return loadScript(lib.cdn, {
+                    crossorigin: 'anonymous',
+                    referrerpolicy: 'no-referrer'
+                }).then(function () {
+                    if (!lib.check()) throw new Error('symbol missing after CDN load');
+                    console.info('[NEXUS] ' + lib.name + ' ← CDN');
+                    return 'cdn';
+                });
+            });
+    }
+
+    /* ------------------------------------------------------------------
+       Orchestration séquentielle :
+       1. JSZip + jsPDF (parallèle, indépendants)
+       2. constants.js
+       3. sorting-logic.js
+       4. app.js
+       ------------------------------------------------------------------ */
+    Promise.all(EXTERNAL_LIBS.map(loadExternal))
+        .then(function () {
+            return loadScript('../shared/constants.js');
+        })
+        .then(function () {
+            return loadScript('../shared/sorting-logic.js');
+        })
+        .then(function () {
+            return loadScript('app.js');
+        })
+        .then(function () {
+            console.info('[NEXUS] All dependencies loaded ✓');
+        })
+        .catch(function (err) {
+            console.error('[NEXUS] Bootstrap failed:', err);
+
+            var banner = document.createElement('div');
+            banner.setAttribute('role', 'alert');
+            banner.style.cssText = [
+                'position:fixed',
+                'top:20px',
+                'left:50%',
+                'transform:translateX(-50%)',
+                'max-width:520px',
+                'padding:16px 20px',
+                'background:#ff4d6d',
+                'color:#fff',
+                'font-family:monospace',
+                'font-size:13px',
+                'border-radius:6px',
+                'box-shadow:0 8px 32px rgba(0,0,0,0.5)',
+                'z-index:9999',
+                'line-height:1.5'
+            ].join(';');
+            banner.innerHTML =
+                '<strong>⚠ Impossible de charger les dépendances</strong><br>' +
+                'Ni le dossier <code>vendor/</code> local, ni le CDN ' +
+                'ne sont accessibles.<br><br>' +
+                '<small>' + String(err.message || err) + '</small>';
+            document.body.appendChild(banner);
+        });
+})();
+</script>
+
+<!-- ====================================================================
+     INLINE UI GLUE — cosmétique + helpers
+     ==================================================================== -->
 <script>
 (function () {
     'use strict';
