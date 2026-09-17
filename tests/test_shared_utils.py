@@ -1,7 +1,31 @@
 #!/usr/bin/env python3
 """
-Tests for shared utility functions
-Tests is_image_file, constants, and other shared utilities
+=====================================================================
+NEXUS QUANTUM // Tests for shared utility functions
+=====================================================================
+File:    tests/test_shared_utils.py
+Targets: shared/__init__.py, shared/constants.py, shared/sorting_logic.py
+
+Covers:
+    1.  Constants (IMAGE_EXTENSIONS, DEFAULT_PRIORITY_CHARS)
+    2.  is_image_file — extensions, case, edge cases
+    3.  get_basename — POSIX, Windows, mixed separators
+    4.  normalize_path — backslash→slash, ./ stripping
+    5.  natural_sort_key — chunking, non-string coercion, DoS guard
+    6.  sort_images — natural, priority, options, paths
+    7.  Path-object input support (Union[str, Path])
+    8.  Module __all__ integrity + exports
+    9.  JS ↔ Python parity spot-checks
+
+NOTE ON Path SUPPORT:
+    is_image_file, natural_sort_key and get_basename accept
+    ``Union[str, Path]``. Non-string, non-Path inputs (int, None,
+    dict, etc.) return False / neutral values.
+
+NOTE ON HIDDEN FILES:
+    Dot-prefixed filenames like ``.jpg`` are treated as hidden files
+    (no real stem) and return False. This matches the JavaScript
+    implementation in ``shared/sorting-logic.js``.
 """
 
 import sys
@@ -9,302 +33,629 @@ from pathlib import Path
 
 import pytest
 
-# Add parent directory to path to import the module
+# ---------------------------------------------------------------------
+# Path bootstrap
+# ---------------------------------------------------------------------
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared import (
+from shared import (  # noqa: E402
     is_image_file,
+    get_basename,
+    normalize_path,
+    natural_sort_key,
+    sort_images,
     IMAGE_EXTENSIONS,
-    DEFAULT_PRIORITY_CHARS
+    DEFAULT_PRIORITY_CHARS,
 )
+import shared  # for __all__ checks
+
+
+# =====================================================================
+# § 01 — CONSTANTS
+# =====================================================================
 
 
 class TestConstants:
-    """Test shared constants"""
+    """Shared constants in shared/constants.py."""
 
-    def test_image_extensions_defined(self):
-        """Test that IMAGE_EXTENSIONS is properly defined"""
-        assert IMAGE_EXTENSIONS is not None
+    @pytest.mark.unit
+    def test_image_extensions_is_a_set(self):
         assert isinstance(IMAGE_EXTENSIONS, set)
-        assert len(IMAGE_EXTENSIONS) > 0
 
-    def test_image_extensions_content(self):
-        """Test that IMAGE_EXTENSIONS contains expected formats"""
-        expected_formats = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
-        assert IMAGE_EXTENSIONS == expected_formats
+    @pytest.mark.unit
+    def test_image_extensions_exact_content(self):
+        expected = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"}
+        assert IMAGE_EXTENSIONS == expected
 
+    @pytest.mark.unit
+    def test_image_extensions_length_is_7(self):
+        assert len(IMAGE_EXTENSIONS) == 7
+
+    @pytest.mark.unit
+    def test_removed_extensions_are_absent(self):
+        """`.tif` and `.svg` were dropped during constants sync."""
+        assert ".tif" not in IMAGE_EXTENSIONS
+        assert ".svg" not in IMAGE_EXTENSIONS
+
+    @pytest.mark.unit
     def test_default_priority_chars(self):
-        """Test DEFAULT_PRIORITY_CHARS constant"""
-        assert DEFAULT_PRIORITY_CHARS == '!'
+        assert DEFAULT_PRIORITY_CHARS == "!"
         assert isinstance(DEFAULT_PRIORITY_CHARS, str)
         assert len(DEFAULT_PRIORITY_CHARS) == 1
-
-
-class TestIsImageFile:
-    """Test is_image_file function"""
-
-    def test_jpg_files(self):
-        """Test .jpg file detection"""
-        assert is_image_file('photo.jpg') is True
-        assert is_image_file('image.JPG') is True
-        assert is_image_file('/path/to/photo.jpg') is True
-
-    def test_jpeg_files(self):
-        """Test .jpeg file detection"""
-        assert is_image_file('photo.jpeg') is True
-        assert is_image_file('image.JPEG') is True
-
-    def test_png_files(self):
-        """Test .png file detection"""
-        assert is_image_file('screenshot.png') is True
-        assert is_image_file('image.PNG') is True
-
-    def test_gif_files(self):
-        """Test .gif file detection"""
-        assert is_image_file('animation.gif') is True
-        assert is_image_file('image.GIF') is True
-
-    def test_bmp_files(self):
-        """Test .bmp file detection"""
-        assert is_image_file('bitmap.bmp') is True
-        assert is_image_file('image.BMP') is True
-
-    def test_tiff_files(self):
-        """Test .tiff file detection"""
-        assert is_image_file('scan.tiff') is True
-        assert is_image_file('image.TIFF') is True
-
-    def test_webp_files(self):
-        """Test .webp file detection"""
-        assert is_image_file('modern.webp') is True
-        assert is_image_file('image.WEBP') is True
-
-    def test_non_image_files(self):
-        """Test that non-image files are rejected"""
-        assert is_image_file('document.pdf') is False
-        assert is_image_file('text.txt') is False
-        assert is_image_file('data.json') is False
-        assert is_image_file('script.py') is False
-        assert is_image_file('archive.zip') is False
-        assert is_image_file('video.mp4') is False
-        assert is_image_file('audio.mp3') is False
-
-    def test_case_insensitivity(self):
-        """Test that extension matching is case-insensitive"""
-        assert is_image_file('Photo.JpG') is True
-        assert is_image_file('IMAGE.PnG') is True
-        assert is_image_file('SCAN.TiFf') is True
-
-    def test_files_with_multiple_dots(self):
-        """Test files with multiple dots in name"""
-        assert is_image_file('file.name.with.dots.jpg') is True
-        assert is_image_file('file.name.with.dots.pdf') is False
-        assert is_image_file('archive.tar.gz') is False
-
-    def test_files_without_extension(self):
-        """Test files without extensions"""
-        assert is_image_file('noextension') is False
-        assert is_image_file('README') is False
-
-    def test_hidden_files(self):
-        """Test hidden files (starting with .)"""
-        assert is_image_file('.hidden.jpg') is True
-        assert is_image_file('.DS_Store') is False
-
-    def test_paths_with_directories(self):
-        """Test full paths with directories"""
-        assert is_image_file('/home/user/photos/IMG_001.jpg') is True
-        assert is_image_file('C:\\Users\\Photos\\image.png') is True
-        assert is_image_file('relative/path/to/photo.gif') is True
-        assert is_image_file('/path/to/document.pdf') is False
-
-    def test_filenames_with_spaces(self):
-        """Test filenames with spaces"""
-        assert is_image_file('my photo.jpg') is True
-        assert is_image_file('photo album.png') is True
-        assert is_image_file('my document.pdf') is False
-
-    def test_unicode_filenames(self):
-        """Test Unicode characters in filenames"""
-        assert is_image_file('图片.jpg') is True  # Chinese
-        assert is_image_file('صورة.png') is True  # Arabic
-        assert is_image_file('фото.gif') is True  # Cyrillic
-
-    def test_special_characters_in_filename(self):
-        """Test special characters"""
-        assert is_image_file('photo (1).jpg') is True
-        assert is_image_file('image [copy].png') is True
-        assert is_image_file('file-name_123.gif') is True
-        assert is_image_file('image@2x.jpg') is True
-        assert is_image_file('photo#1.png') is True
-
-    def test_empty_string(self):
-        """Test empty string"""
-        assert is_image_file('') is False
-
-    def test_only_extension(self):
-        """Test filenames that are only extension"""
-        assert is_image_file('.jpg') is True
-        assert is_image_file('.png') is True
-
-    def test_trailing_dots(self):
-        """Test filenames with trailing dots"""
-        assert is_image_file('photo.jpg.') is False
-        assert is_image_file('photo.') is False
-
-    def test_numeric_filenames(self):
-        """Test numeric filenames"""
-        assert is_image_file('123.jpg') is True
-        assert is_image_file('001.png') is True
-        assert is_image_file('0.gif') is True
-
-    def test_very_long_filenames(self):
-        """Test very long filenames"""
-        long_name = 'a' * 200 + '.jpg'
-        assert is_image_file(long_name) is True
-
-        long_name_no_ext = 'a' * 255
-        assert is_image_file(long_name_no_ext) is False
-
-    def test_priority_marked_files(self):
-        """Test files with priority markers"""
-        assert is_image_file('!cover.jpg') is True
-        assert is_image_file('@special.png') is True
-        assert is_image_file('#important.gif') is True
-
-    def test_common_non_image_extensions(self):
-        """Test common non-image file extensions"""
-        non_images = [
-            'file.txt', 'doc.docx', 'sheet.xlsx', 'slide.pptx',
-            'archive.zip', 'archive.rar', 'archive.7z',
-            'video.mp4', 'video.avi', 'video.mkv',
-            'audio.mp3', 'audio.wav', 'audio.flac',
-            'code.py', 'code.js', 'code.cpp',
-            'data.json', 'data.xml', 'data.csv'
-        ]
-
-        for filename in non_images:
-            assert is_image_file(filename) is False, f"{filename} should not be detected as image"
-
-    def test_pathlib_path_objects(self):
-        """Test that Path objects work correctly"""
-        from pathlib import Path
-
-        assert is_image_file(Path('photo.jpg')) is True
-        assert is_image_file(Path('/path/to/image.png')) is True
-        assert is_image_file(Path('document.pdf')) is False
-
-    def test_windows_paths(self):
-        """Test Windows-style paths"""
-        assert is_image_file('C:\\Photos\\IMG_001.jpg') is True
-        assert is_image_file('D:\\Images\\photo.png') is True
-        assert is_image_file('\\\\network\\share\\image.gif') is True
-
-    def test_unix_paths(self):
-        """Test Unix-style paths"""
-        assert is_image_file('/home/user/photos/img.jpg') is True
-        assert is_image_file('/var/www/images/banner.png') is True
-        assert is_image_file('~/Pictures/photo.gif') is True
-
-    def test_relative_paths(self):
-        """Test relative paths"""
-        assert is_image_file('./photo.jpg') is True
-        assert is_image_file('../images/photo.png') is True
-        assert is_image_file('../../gallery/img.gif') is True
-
-    def test_url_like_paths(self):
-        """Test URL-like paths (should still work based on extension)"""
-        assert is_image_file('http://example.com/photo.jpg') is True
-        assert is_image_file('https://example.com/image.png') is True
-        assert is_image_file('file:///path/to/image.gif') is True
 
 
 class TestImageExtensionsSet:
-    """Test IMAGE_EXTENSIONS set properties"""
+    """Structural invariants of IMAGE_EXTENSIONS."""
 
-    def test_is_set_type(self):
-        """Test that IMAGE_EXTENSIONS is a set"""
-        assert isinstance(IMAGE_EXTENSIONS, set)
-
-    def test_contains_lowercase_only(self):
-        """Test that all extensions are lowercase"""
+    @pytest.mark.unit
+    def test_all_lowercase(self):
         for ext in IMAGE_EXTENSIONS:
             assert ext == ext.lower(), f"{ext} should be lowercase"
 
+    @pytest.mark.unit
     def test_all_start_with_dot(self):
-        """Test that all extensions start with a dot"""
         for ext in IMAGE_EXTENSIONS:
-            assert ext.startswith('.'), f"{ext} should start with dot"
+            assert ext.startswith("."), f"{ext} should start with dot"
 
-    def test_no_empty_strings(self):
-        """Test that no empty strings in set"""
-        assert '' not in IMAGE_EXTENSIONS
+    @pytest.mark.unit
+    def test_no_empty_string(self):
+        assert "" not in IMAGE_EXTENSIONS
 
+    @pytest.mark.unit
     def test_no_duplicates(self):
-        """Test that there are no duplicates (sets don't allow duplicates anyway)"""
-        extensions_list = list(IMAGE_EXTENSIONS)
-        assert len(extensions_list) == len(set(extensions_list))
+        # Sets can't have duplicates by construction, but we check anyway
+        # (would catch a future migration to list)
+        extensions = list(IMAGE_EXTENSIONS)
+        assert len(extensions) == len(set(extensions))
 
-    def test_common_formats_included(self):
-        """Test that common image formats are included"""
-        common_formats = ['.jpg', '.jpeg', '.png', '.gif']
-        for fmt in common_formats:
-            assert fmt in IMAGE_EXTENSIONS, f"{fmt} should be in IMAGE_EXTENSIONS"
+    @pytest.mark.unit
+    def test_common_formats_present(self):
+        for fmt in [".jpg", ".jpeg", ".png", ".gif"]:
+            assert fmt in IMAGE_EXTENSIONS
 
-    def test_modern_formats_included(self):
-        """Test that modern formats are included"""
-        assert '.webp' in IMAGE_EXTENSIONS
-
-    def test_traditional_formats_included(self):
-        """Test that traditional formats are included"""
-        assert '.bmp' in IMAGE_EXTENSIONS
-        assert '.tiff' in IMAGE_EXTENSIONS
+    @pytest.mark.unit
+    def test_modern_and_traditional_formats_present(self):
+        assert ".webp" in IMAGE_EXTENSIONS
+        assert ".bmp" in IMAGE_EXTENSIONS
+        assert ".tiff" in IMAGE_EXTENSIONS
 
 
-class TestPriorityCharsConstant:
-    """Test DEFAULT_PRIORITY_CHARS constant"""
+# =====================================================================
+# § 02 — is_image_file : SUPPORTED EXTENSIONS
+# =====================================================================
 
-    def test_is_string(self):
-        """Test that it's a string"""
-        assert isinstance(DEFAULT_PRIORITY_CHARS, str)
 
-    def test_not_empty(self):
-        """Test that it's not empty"""
-        assert len(DEFAULT_PRIORITY_CHARS) > 0
+class TestIsImageFileSupported:
+    """Every supported extension must be recognized (case-insensitive)."""
 
-    def test_default_value(self):
-        """Test the default value"""
-        assert DEFAULT_PRIORITY_CHARS == '!'
+    @pytest.mark.unit
+    @pytest.mark.parametrize("ext", [
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp",
+    ])
+    def test_lowercase_extension(self, ext):
+        assert is_image_file(f"photo{ext}") is True
 
-    def test_single_character(self):
-        """Test that it's a single character (by default)"""
-        assert len(DEFAULT_PRIORITY_CHARS) == 1
+    @pytest.mark.unit
+    @pytest.mark.parametrize("ext", [
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp",
+    ])
+    def test_uppercase_extension(self, ext):
+        assert is_image_file(f"photo{ext.upper()}") is True
+
+    @pytest.mark.unit
+    def test_mixed_case_extension(self):
+        assert is_image_file("Photo.JpG") is True
+        assert is_image_file("IMAGE.PnG") is True
+        assert is_image_file("SCAN.TiFf") is True
+        assert is_image_file("modern.WeBp") is True
+
+
+# =====================================================================
+# § 03 — is_image_file : REJECTED CASES
+# =====================================================================
+
+
+class TestIsImageFileRejected:
+    """Files that must NOT be detected as images."""
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("filename", [
+        "document.pdf", "text.txt", "data.json", "script.py",
+        "archive.zip", "video.mp4", "audio.mp3",
+    ])
+    def test_common_non_images(self, filename):
+        assert is_image_file(filename) is False
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("filename", [
+        "file.txt", "doc.docx", "sheet.xlsx", "slide.pptx",
+        "archive.zip", "archive.rar", "archive.7z",
+        "video.mp4", "video.avi", "video.mkv",
+        "audio.mp3", "audio.wav", "audio.flac",
+        "code.py", "code.js", "code.cpp",
+        "data.json", "data.xml", "data.csv",
+    ])
+    def test_extended_non_images(self, filename):
+        assert is_image_file(filename) is False
+
+    @pytest.mark.unit
+    def test_no_extension(self):
+        assert is_image_file("noextension") is False
+        assert is_image_file("README") is False
+        assert is_image_file("Makefile") is False
+
+    @pytest.mark.unit
+    def test_trailing_dots(self):
+        assert is_image_file("photo.jpg.") is False
+        assert is_image_file("photo.") is False
+
+    @pytest.mark.unit
+    def test_removed_extensions_rejected(self):
+        """`.tif` and `.svg` are no longer supported."""
+        assert is_image_file("scan.tif") is False
+        assert is_image_file("logo.svg") is False
+
+    @pytest.mark.unit
+    def test_empty_string(self):
+        assert is_image_file("") is False
+
+
+# =====================================================================
+# § 04 — is_image_file : HIDDEN FILES
+# =====================================================================
+
+
+class TestIsImageFileHidden:
+    """Dot-prefixed filenames — matches JS behavior."""
+
+    @pytest.mark.unit
+    def test_dot_only_extension_rejected(self):
+        """
+        ``.jpg`` alone is a hidden file (no stem), not an image.
+        Matches JS: `isImageFile('.jpg') === false`.
+        """
+        assert is_image_file(".jpg") is False
+        assert is_image_file(".png") is False
+        assert is_image_file(".gif") is False
+
+    @pytest.mark.unit
+    def test_hidden_file_with_real_extension_accepted(self):
+        """``.hidden.jpg`` has a real extension → accepted."""
+        assert is_image_file(".hidden.jpg") is True
+        assert is_image_file(".cover.png") is True
+
+    @pytest.mark.unit
+    def test_metadata_files_rejected(self):
+        assert is_image_file(".DS_Store") is False
+        assert is_image_file("Thumbs.db") is False
+
+
+# =====================================================================
+# § 05 — is_image_file : PATHS
+# =====================================================================
+
+
+class TestIsImageFilePaths:
+
+    @pytest.mark.unit
+    def test_posix_absolute(self):
+        assert is_image_file("/home/user/photos/IMG_001.jpg") is True
+        assert is_image_file("/var/www/images/banner.png") is True
+        assert is_image_file("/path/to/document.pdf") is False
+
+    @pytest.mark.unit
+    def test_posix_relative(self):
+        assert is_image_file("./photo.jpg") is True
+        assert is_image_file("../images/photo.png") is True
+        assert is_image_file("../../gallery/img.gif") is True
+
+    @pytest.mark.unit
+    def test_posix_relative_dirs(self):
+        assert is_image_file("relative/path/to/photo.gif") is True
+
+    @pytest.mark.unit
+    def test_windows_paths(self):
+        assert is_image_file("C:\\Users\\Photos\\image.png") is True
+        assert is_image_file("D:\\Images\\photo.jpg") is True
+        assert is_image_file("\\\\network\\share\\image.gif") is True
+
+    @pytest.mark.unit
+    def test_home_shorthand(self):
+        assert is_image_file("~/Pictures/photo.gif") is True
+
+    @pytest.mark.unit
+    def test_url_like_paths(self):
+        assert is_image_file("http://example.com/photo.jpg") is True
+        assert is_image_file("https://example.com/image.png") is True
+        assert is_image_file("file:///path/to/image.gif") is True
+
+    @pytest.mark.unit
+    def test_backslash_in_posix_context(self):
+        """Windows-style separators work regardless of host OS."""
+        assert is_image_file("folder\\sub\\pic.jpg") is True
+
+
+# =====================================================================
+# § 06 — is_image_file : SPECIAL CHARACTERS & UNICODE
+# =====================================================================
+
+
+class TestIsImageFileSpecialChars:
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("filename", [
+        "图片.jpg",       # Chinese
+        "صورة.png",       # Arabic
+        "фото.gif",       # Cyrillic
+        "画像.jpeg",      # Japanese
+    ])
+    def test_unicode_filenames(self, filename):
+        assert is_image_file(filename) is True
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("filename", [
+        "my photo.jpg",
+        "photo album.png",
+        "image (1).jpg",
+        "image [copy].png",
+        "file-name_123.gif",
+        "image@2x.jpg",
+        "photo#1.png",
+    ])
+    def test_special_characters(self, filename):
+        assert is_image_file(filename) is True
+
+    @pytest.mark.unit
+    def test_numeric_filenames(self):
+        assert is_image_file("123.jpg") is True
+        assert is_image_file("001.png") is True
+        assert is_image_file("0.gif") is True
+
+    @pytest.mark.unit
+    def test_priority_marked_filenames(self):
+        """Priority chars do not affect extension detection."""
+        assert is_image_file("!cover.jpg") is True
+        assert is_image_file("@special.png") is True
+        assert is_image_file("#important.gif") is True
+
+    @pytest.mark.unit
+    def test_very_long_filename(self):
+        assert is_image_file("a" * 200 + ".jpg") is True
+        assert is_image_file("a" * 255) is False
+
+
+# =====================================================================
+# § 07 — is_image_file : NON-STRING INPUT
+# =====================================================================
+
+
+class TestIsImageFileNonString:
+    """Robustness against non-string inputs."""
+
+    @pytest.mark.unit
+    def test_pathlib_path_supported(self):
+        """
+        ``Path`` objects are coerced to str. If your implementation
+        rejects non-str inputs strictly, this test documents the
+        *expected* behavior of the shared module.
+        """
+        assert is_image_file(Path("photo.jpg")) is True
+        assert is_image_file(Path("/path/to/image.png")) is True
+        assert is_image_file(Path("document.pdf")) is False
+
+    @pytest.mark.unit
+    def test_none_returns_false(self):
+        assert is_image_file(None) is False
+
+    @pytest.mark.unit
+    def test_int_returns_false(self):
+        assert is_image_file(42) is False
+
+    @pytest.mark.unit
+    def test_dict_returns_false(self):
+        assert is_image_file({}) is False
+
+    @pytest.mark.unit
+    def test_list_returns_false(self):
+        assert is_image_file([]) is False
+
+
+# =====================================================================
+# § 08 — get_basename
+# =====================================================================
+
+
+class TestGetBasename:
+
+    @pytest.mark.unit
+    def test_posix_absolute(self):
+        assert get_basename("/home/user/photo.jpg") == "photo.jpg"
+
+    @pytest.mark.unit
+    def test_posix_relative(self):
+        assert get_basename("folder/image.jpg") == "image.jpg"
+
+    @pytest.mark.unit
+    def test_windows_path(self):
+        assert get_basename("C:\\Users\\Photos\\pic.png") == "pic.png"
+
+    @pytest.mark.unit
+    def test_windows_relative(self):
+        assert get_basename("folder\\subfolder\\image.jpg") == "image.jpg"
+
+    @pytest.mark.unit
+    def test_mixed_separators(self):
+        assert get_basename("a\\b/c\\d.jpg") == "d.jpg"
+
+    @pytest.mark.unit
+    def test_no_separator(self):
+        assert get_basename("image.jpg") == "image.jpg"
+
+    @pytest.mark.unit
+    def test_empty_returns_empty(self):
+        assert get_basename("") == ""
+
+    @pytest.mark.unit
+    def test_none_returns_empty(self):
+        assert get_basename(None) == ""
+
+    @pytest.mark.unit
+    def test_path_object_supported(self):
+        assert get_basename(Path("/a/b/c.jpg")) == "c.jpg"
+
+
+# =====================================================================
+# § 09 — normalize_path
+# =====================================================================
+
+
+class TestNormalizePath:
+
+    @pytest.mark.unit
+    def test_backslash_to_slash(self):
+        assert normalize_path("folder\\sub\\image.jpg") == "folder/sub/image.jpg"
+
+    @pytest.mark.unit
+    def test_strips_dot_slash(self):
+        assert normalize_path("./folder/image.jpg") == "folder/image.jpg"
+
+    @pytest.mark.unit
+    def test_strips_dot_backslash(self):
+        # ./ prefix on Windows-style path
+        assert normalize_path(".\\folder\\image.jpg") == "folder/image.jpg"
+
+    @pytest.mark.unit
+    def test_already_normalized(self):
+        assert normalize_path("folder/image.jpg") == "folder/image.jpg"
+
+    @pytest.mark.unit
+    def test_empty_returns_empty(self):
+        assert normalize_path("") == ""
+
+    @pytest.mark.unit
+    def test_none_returns_empty(self):
+        assert normalize_path(None) == ""
+
+
+# =====================================================================
+# § 10 — natural_sort_key
+# =====================================================================
+
+
+class TestNaturalSortKey:
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize("text,expected", [
+        ("file_1.jpg",     ["file_", 1, ".jpg"]),
+        ("file_10.jpg",    ["file_", 10, ".jpg"]),
+        ("file_001.jpg",   ["file_", 1, ".jpg"]),
+        ("ch1_page10.jpg", ["ch", 1, "_page", 10, ".jpg"]),
+        ("cover.jpg",      ["cover.jpg"]),
+        ("12345",          ["", 12345, ""]),
+        ("",               [""]),
+        ("a1b2c3",         ["a", 1, "b", 2, "c", 3]),
+    ])
+    def test_chunking(self, text, expected):
+        assert natural_sort_key(text) == expected
+
+    @pytest.mark.unit
+    def test_zero_padded_normalized(self):
+        assert natural_sort_key("page_001.jpg") == natural_sort_key("page_1.jpg")
+        assert natural_sort_key("page_010.jpg") == natural_sort_key("page_10.jpg")
+
+    @pytest.mark.unit
+    def test_non_string_input_safe(self):
+        """Non-string inputs are coerced without crashing."""
+        assert natural_sort_key(None) == [""]
+        assert natural_sort_key(42) == ["42"]
+
+    @pytest.mark.unit
+    def test_huge_digit_chunk_does_not_crash(self):
+        """
+        The Python implementation caps digit chunks to 4000 to prevent
+        DoS on Python 3.11+ (`sys.set_int_max_str_digits`).
+        """
+        huge = "1" * 5000 + ".jpg"
+        key = natural_sort_key(huge)
+        # Must return a list without raising
+        assert isinstance(key, list)
+        assert len(key) >= 1
+
+
+# =====================================================================
+// § 11 — sort_images
+// =====================================================================
+
+
+class TestSortImages:
+
+    @pytest.mark.unit
+    def test_natural_sort_basic(self):
+        files = ["file_1.jpg", "file_2.jpg", "file_10.jpg", "file_20.jpg"]
+        assert sort_images(files) == files
+
+    @pytest.mark.unit
+    def test_natural_sort_mixed(self):
+        files = ["file_10.jpg", "file_1.jpg", "file_2.jpg", "file_20.jpg"]
+        assert sort_images(files) == [
+            "file_1.jpg", "file_2.jpg", "file_10.jpg", "file_20.jpg",
+        ]
+
+    @pytest.mark.unit
+    def test_priority_first(self):
+        files = ["page_1.jpg", "!cover.jpg", "page_2.jpg", "!back.jpg"]
+        assert sort_images(files) == [
+            "!back.jpg", "!cover.jpg", "page_1.jpg", "page_2.jpg",
+        ]
+
+    @pytest.mark.unit
+    def test_custom_priority_chars(self):
+        files = ["page_1.jpg", "@special.jpg", "page_2.jpg", "@bonus.jpg"]
+        assert sort_images(files, priority_chars="@") == [
+            "@bonus.jpg", "@special.jpg", "page_1.jpg", "page_2.jpg",
+        ]
+
+    @pytest.mark.unit
+    def test_multi_char_priority(self):
+        files = ["page_10.jpg", "@special.jpg", "!cover.jpg", "page_2.jpg"]
+        result = sort_images(files, priority_chars="!@")
+        assert result[0] == "!cover.jpg"
+        assert result[1] == "@special.jpg"
+
+    @pytest.mark.unit
+    def test_natural_sort_disabled(self):
+        files = ["page_10.jpg", "page_1.jpg", "page_2.jpg"]
+        assert sort_images(files, use_natural_sort=False) == [
+            "page_1.jpg", "page_10.jpg", "page_2.jpg",
+        ]
+
+    @pytest.mark.unit
+    def test_empty_list(self):
+        assert sort_images([]) == []
+
+    @pytest.mark.unit
+    def test_non_array_input(self):
+        assert sort_images(None) == []
+        assert sort_images(42) == []
+
+    @pytest.mark.unit
+    def test_does_not_mutate_input(self):
+        files = ["b.jpg", "a.jpg", "c.jpg"]
+        original = files[:]
+        sort_images(files)
+        assert files == original
+
+    @pytest.mark.unit
+    def test_windows_paths(self):
+        files = [
+            "folder\\page_10.jpg",
+            "folder\\page_1.jpg",
+            "folder\\page_2.jpg",
+        ]
+        assert sort_images(files) == [
+            "folder\\page_1.jpg",
+            "folder\\page_2.jpg",
+            "folder\\page_10.jpg",
+        ]
+
+
+# =====================================================================
+// § 12 — MODULE EXPORTS & __all__
+// =====================================================================
 
 
 class TestModuleExports:
-    """Test that the shared module exports all necessary items"""
+    """Every public symbol must be re-exported from `shared`."""
 
-    def test_exports_is_image_file(self):
-        """Test that is_image_file is exported"""
-        from shared import is_image_file
-        assert callable(is_image_file)
+    @pytest.mark.unit
+    def test_is_image_file_callable(self):
+        assert callable(shared.is_image_file)
 
-    def test_exports_image_extensions(self):
-        """Test that IMAGE_EXTENSIONS is exported"""
-        from shared import IMAGE_EXTENSIONS
-        assert IMAGE_EXTENSIONS is not None
+    @pytest.mark.unit
+    def test_get_basename_callable(self):
+        assert callable(shared.get_basename)
 
-    def test_exports_default_priority_chars(self):
-        """Test that DEFAULT_PRIORITY_CHARS is exported"""
-        from shared import DEFAULT_PRIORITY_CHARS
-        assert DEFAULT_PRIORITY_CHARS is not None
+    @pytest.mark.unit
+    def test_normalize_path_callable(self):
+        assert callable(shared.normalize_path)
 
-    def test_exports_natural_sort_key(self):
-        """Test that natural_sort_key is exported"""
-        from shared import natural_sort_key
-        assert callable(natural_sort_key)
+    @pytest.mark.unit
+    def test_natural_sort_key_callable(self):
+        assert callable(shared.natural_sort_key)
 
-    def test_exports_sort_images(self):
-        """Test that sort_images is exported"""
-        from shared import sort_images
-        assert callable(sort_images)
+    @pytest.mark.unit
+    def test_sort_images_callable(self):
+        assert callable(shared.sort_images)
+
+    @pytest.mark.unit
+    def test_constants_exported(self):
+        assert shared.IMAGE_EXTENSIONS is not None
+        assert shared.DEFAULT_PRIORITY_CHARS == "!"
+        assert shared.MAX_FILE_SIZE_BYTES == 100 * 1024 * 1024
+        assert shared.MAX_EXTRACTED_SIZE_BYTES == 500 * 1024 * 1024
+        assert shared.MAX_FILES_IN_ZIP == 10000
+        assert shared.MAX_COMPRESSION_RATIO == 100
+        assert shared.MAX_IMAGE_DIMENSION == 2000
+        assert shared.IMAGE_SCALE_FACTOR == 4
+
+    @pytest.mark.unit
+    def test_all_symbols_present(self):
+        """Every symbol in __all__ must actually be importable."""
+        missing = [name for name in shared.__all__ if not hasattr(shared, name)]
+        assert missing == [], f"Missing exports: {missing}"
+
+    @pytest.mark.unit
+    def test_all_is_a_list_of_strings(self):
+        assert isinstance(shared.__all__, list)
+        for name in shared.__all__:
+            assert isinstance(name, str)
+
+
+# =====================================================================
+// § 13 — JS ↔ PYTHON PARITY SPOT-CHECKS
+// =====================================================================
+
+
+class TestPythonJSParity:
+    """
+    Spot-checks mirroring `tests/sorting-logic.test.js` to guarantee
+    cross-runtime behavior alignment.
+    """
+
+    @pytest.mark.unit
+    def test_parity_dot_extension_rejected(self):
+        # JS: isImageFile('.jpg') === false
+        assert is_image_file(".jpg") is False
+
+    @pytest.mark.unit
+    def test_parity_hidden_file_with_ext_accepted(self):
+        # JS: isImageFile('.hidden.jpg') === true
+        assert is_image_file(".hidden.jpg") is True
+
+    @pytest.mark.unit
+    def test_parity_trailing_dot_rejected(self):
+        # JS: isImageFile('file.') === false
+        assert is_image_file("file.") is False
+
+    @pytest.mark.unit
+    def test_parity_seven_extensions(self):
+        # JS: IMAGE_EXTENSIONS.length === 7
+        assert len(IMAGE_EXTENSIONS) == 7
+
+    @pytest.mark.unit
+    def test_parity_default_priority_bang(self):
+        assert DEFAULT_PRIORITY_CHARS == "!"
+
+    @pytest.mark.unit
+    def test_parity_natural_sort(self):
+        files = ["page_10.jpg", "page_1.jpg", "page_2.jpg"]
+        assert sort_images(files) == [
+            "page_1.jpg", "page_2.jpg", "page_10.jpg",
+        ]
+
+    @pytest.mark.unit
+    def test_parity_priority_first(self):
+        files = ["page_1.jpg", "!cover.jpg", "page_2.jpg"]
+        assert sort_images(files) == [
+            "!cover.jpg", "page_1.jpg", "page_2.jpg",
+        ]
